@@ -1,0 +1,225 @@
+{
+    "app": {
+        "screenLabel": "Dream Home — Home"
+    },
+    "nav": {
+        "buy": "Buy",
+        "rent": "Rent",
+        "newBuild": "New builds",
+        "agents": "Agents",
+        "about": "About",
+        "login": "Log in",
+        "post": "+ List property",
+        "languageSwitch": "EN · UA"
+    },
+    "hero": {
+        "eyebrow": "12 480 active listings · Updated today",
+        "title1": "Home where",
+        "title2": "your story",
+        "title3": "begins.",
+        "lede": "Find real estate for living, investment, or leisure — with an interactive map, one-click filters, and transparent price analytics.",
+        "tabs": {
+            "buy": "Buy",
+            "rent": "Rent",
+            "comm": "Commercial",
+            "new": "New builds"
+        },
+        "search": {
+            "location": "Location",
+            "type": "Type",
+            "price": "Price",
+            "placeholder": "Kyiv, Lviv, Odesa…",
+            "defaultLocation": "Kyiv, all districts",
+            "selectAny": "Any",
+            "apartment": "Apartment",
+            "house": "House",
+            "townhouse": "Townhouse",
+            "penthouse": "Penthouse",
+            "priceAny": "Up to $1M",
+            "price250": "Up to $250K",
+            "price250to500": "$250K — $500K",
+            "price500to1": "$500K — $1M",
+            "price1plus": "$1M+",
+            "go": "Search"
+        },
+        "stats": {
+            "offers": "Listings",
+            "agents": "Verified agents",
+            "satisfied": "Satisfied clients",
+            "response": "Average response time"
+        },
+        "scroll": "scroll to map",
+        "placeholders": {
+            "hero": "hero · architectural exterior"
+        }
+    },
+    "mapSection": {
+        "eyebrow": "02 · Interactive map",
+        "title": "Explore the city like never before",
+        "lede": "{{count}} properties in focus. Click a marker to see details, or use expandable filter and info panels.",
+        "chips": {
+            "newBuilds": "New builds",
+            "renovated": "Renovated",
+            "nearMetro": "Near metro",
+            "more": "+ 12 more"
+        },
+        "controls": {
+            "expand": "Expand",
+            "layers": "Layers",
+            "position": "My location"
+        },
+        "tabs": {
+            "filters": "Filters",
+            "info": "Info"
+        },
+        "panel": {
+            "title": "Filters",
+            "sub": "{{active}} active · {{count}} results"
+        },
+        "filters": {
+            "transaction": "Transaction type",
+            "price": "Price, $",
+            "rooms": "Rooms",
+            "area": "Area",
+            "features": "Features",
+            "all": "All",
+            "sale": "Buy",
+            "rent": "Rent",
+            "from": "from",
+            "to": "to",
+            "zero": "Any",
+            "balcony": "Balcony / terrace",
+            "parking": "Parking",
+            "furnished": "Furnished",
+            "nearMetro": "Near metro",
+            "newBuild": "New build",
+            "renovated": "Renovated"
+        },
+        "buttons": {
+            "reset": "Reset",
+            "show": "Show {{count}}"
+        },
+        "info": {
+            "heading": "Neighborhood",
+            "schools": "Schools",
+            "kindergartens": "Daycares",
+            "metro": "Metro",
+            "park": "Park",
+            "nearby": "nearby",
+            "walk": "min walk",
+            "meters": "m"
+        },
+        "dynamics": {
+            "heading": "Price dynamics",
+            "period": "Over 12 months"
+        },
+        "actions": {
+            "save": "Save",
+            "contact": "Contact"
+        },
+        "status": {
+            "sale": "For sale",
+            "rent": "For rent"
+        },
+        "properties": {
+            "rooms": "{{value}} rooms",
+            "bathrooms": "{{value}} baths",
+            "area": "{{value}} m²",
+            "perMonth": " / mo",
+            "type": {
+                "Квартира": "Apartment",
+                "Будинок": "House",
+                "Таунхаус": "Townhouse",
+                "Пентхаус": "Penthouse"
+            }
+        },
+        "watermark": "Dream Home · Interactive map"
+    },
+    "featured": {
+        "eyebrow": "03 · Editor's picks",
+        "title": "Featured properties of the week",
+        "allRecommendations": "All recommendations"
+    },
+    "categories": {
+        "eyebrow": "04 · Categories",
+        "title": "Choose your search format",
+        "objectsCount": "{{count}} properties",
+        "labels": {
+            "buy": "Buy",
+            "rent": "Rent",
+            "comm": "Commercial",
+            "new": "New builds"
+        }
+    },
+    "listCta": {
+        "eyebrow": "05 · For owners",
+        "title": "List your property —",
+        "titleIt": "and get your first contact within 24 hours.",
+        "lede": "Free. Moderated listings. Access to 50,000+ buyers per month. No hidden fees — you pay only for results.",
+        "buttons": {
+            "rent": "I'm renting",
+            "sell": "I'm selling"
+        },
+        "meta": {
+            "rating": "★ 4.9 / 5 — 2,380 reviews",
+            "support": "24/7 support"
+        },
+        "phone": {
+            "publishBtn": "Publish",
+            "label": "Property listing form"
+        },
+        "badges": {
+            "viewsIncrease": "+24%",
+            "viewsIncreaseText": "views this week",
+            "newRequests": "3 new",
+            "newRequestsText": "viewing requests"
+        }
+    },
+    "footer": {
+        "brand": "Dream Home",
+        "tagline": "Next-generation real estate platform. Transparent, fast, humane.",
+        "sections": {
+            "search": "Search",
+            "owners": "For owners",
+            "company": "Company"
+        },
+        "links": {
+            "buyApartment": "Buy apartment",
+            "rent": "Rent",
+            "newBuilds": "New builds",
+            "commercial": "Commercial",
+            "suburbs": "Suburbs",
+            "list": "List property",
+            "tariffs": "Pricing",
+            "verification": "Verification",
+            "priceAnalytics": "Price analytics",
+            "dealSecurity": "Deal security",
+            "about": "About",
+            "careers": "Careers",
+            "press": "Press",
+            "partners": "Partners",
+            "contacts": "Contacts"
+        },
+        "copyright": "© 2024–2026 Dream Home · All rights reserved",
+        "made": "Made with ❤ in Ukraine"
+    },
+    "tweaks": {
+        "title": "Tweaks",
+        "close": "Close tweaks",
+        "sections": {
+            "accent": "Accent",
+            "typography": "Typography",
+            "sections": "Sections"
+        },
+        "accent": {
+            "color": "Accent color",
+            "background": "Page background"
+        },
+        "typography": {
+            "headings": "Headings"
+        },
+        "sections": {
+            "showHero": "Show hero"
+        }
+    }
+}
