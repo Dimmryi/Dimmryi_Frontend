@@ -6,9 +6,12 @@
         "buy": "Buy",
         "rent": "Rent",
         "newBuild": "New builds",
+        "services": "Services",
         "agents": "Agents",
         "about": "About",
         "login": "Log in",
+        "register": "Register",
+        "profile": "My profile",
         "post": "+ List property",
         "languageSwitch": "EN · UA"
     },

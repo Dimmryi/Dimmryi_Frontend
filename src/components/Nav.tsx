@@ -1,14 +1,90 @@
 import { useLanguage } from '../LanguageProvider';
+import { useEffect, useMemo, useState } from 'react';
+import { Link } from 'react-router-dom';
+import { useAuth } from '../services/useAuth';
+import { useDispatch, useSelector } from 'react-redux';
+import { setAuthProperty, resetAuthProperty, setAuthChecking } from '../features/auth/authSlice';
+import {
+    normalizeSubscribeType,
+    setIsRegistration,
+    setUserName,
+    setUserId,
+    setRole,
+    setSubscribeType,
+    setSubscribeExpired,
+} from '../features/registration/registrationSlice';
+import type { RootState } from '../store/store';
 
 export const Nav = () => {
     const { language, setLanguage, translate } = useLanguage();
+    const [isProfileOpen, setIsProfileOpen] = useState(false);
     const links = [
-        translate('nav.buy'),
-        translate('nav.rent'),
-        translate('nav.newBuild'),
-        translate('nav.agents'),
-        translate('nav.about'),
+        { label: translate('nav.buy'), to: '/listings?listingType=sale' },
+        { label: translate('nav.rent'), to: '/listings?listingType=rent' },
+        { label: translate('nav.services') || 'Послуги', to: '/services' },
+        { label: translate('nav.agents'), to: '/agents' },
+        { label: translate('nav.about'), to: '/about' },
     ];
+    const dispatch = useDispatch();
+    const { checkAuth, handleResetUserData } = useAuth();
+    const isRegistered = useSelector((state: RootState) => state.registration.isRegistered);
+    const userName = useSelector((state: RootState) => state.registration.userName);
+    const isAuthenticated = useSelector((state: RootState) => state.auth.isLogin);
+    const sessionExpiry = Number(localStorage.getItem('sessionExpiry') || 0);
+    const isSessionAlive = isAuthenticated && sessionExpiry > Date.now();
+
+    const authCta = useMemo(() => {
+        if (isRegistered && isSessionAlive) {
+            return {
+                label: translate('nav.profile') || 'Мій профіль',
+                to: '/my-listings',
+                mode: 'profile',
+            };
+        }
+
+        if (isRegistered && !isSessionAlive) {
+            return {
+                label: translate('nav.login'),
+                to: '/login',
+                mode: 'login',
+            };
+        }
+
+        return {
+            label: translate('nav.register') || 'Зареєструватись',
+            to: '/registration',
+            mode: 'register',
+        };
+    }, [isRegistered, isSessionAlive, translate]);
+
+    useEffect(() => {
+        checkAuth().then(({ isAuthenticated: serverAuth, user, expiresAt }) => {
+            if (serverAuth && user) {
+                if (expiresAt) {
+                    localStorage.setItem('sessionExpiry', String(new Date(expiresAt).getTime()));
+                }
+                dispatch(setAuthProperty(true));
+                dispatch(setIsRegistration(true));
+                dispatch(setUserName(user.name));
+                dispatch(setUserId(user.id));
+                dispatch(setRole(user.role === 'admin' ? 'admin' : 'user'));
+                if (user.subscribeType !== undefined) {
+                    dispatch(setSubscribeType(normalizeSubscribeType(user.subscribeType)));
+                    dispatch(setSubscribeExpired(user.subscribeExpired ?? null));
+                }
+            } else {
+                dispatch(resetAuthProperty());
+            }
+            dispatch(setAuthChecking(false));
+        });
+        // Auth status is intentionally refreshed once per Nav mount.
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
+    const handleLogout = async () => {
+        await handleResetUserData();
+        setIsProfileOpen(false);
+    };
 
     return (
         <nav className="dm-nav">
@@ -40,9 +116,9 @@ export const Nav = () => {
                 </div>
             </div>
             <ul className="dm-nav__links">
-                {links.map((l) => (
-                    <li key={l}>
-                        <a href="#">{l}</a>
+                {links.map((link) => (
+                    <li key={link.to}>
+                        <Link to={link.to}>{link.label}</Link>
                     </li>
                 ))}
             </ul>
@@ -54,7 +130,29 @@ export const Nav = () => {
                 >
                     {translate('nav.languageSwitch')}
                 </button>
-                <button className="dm-btn dm-btn--ghost">{translate('nav.login')}</button>
+                {authCta.mode === 'profile' ? (
+                    <div className="dm-profile-menu">
+                        <button
+                            className="dm-btn dm-btn--ghost"
+                            onClick={() => setIsProfileOpen((value) => !value)}
+                            aria-expanded={isProfileOpen}
+                            aria-haspopup="menu"
+                        >
+                            {authCta.label}
+                        </button>
+                        {isProfileOpen && (
+                            <div className="dm-profile-menu__panel" role="menu">
+                                <div className="dm-profile-menu__user">{userName || authCta.label}</div>
+                                <Link to="/my-listings" onClick={() => setIsProfileOpen(false)}>MyListings</Link>
+                                <Link to="/my-comments" onClick={() => setIsProfileOpen(false)}>MyComments</Link>
+                                <Link to="/my-notifications" onClick={() => setIsProfileOpen(false)}>MyNotification</Link>
+                                <button onClick={handleLogout}>LogOut</button>
+                            </div>
+                        )}
+                    </div>
+                ) : (
+                    <Link className="dm-btn dm-btn--ghost" to={authCta.to}>{authCta.label}</Link>
+                )}
                 <button className="dm-btn dm-btn--accent">{translate('nav.post')}</button>
             </div>
         </nav>

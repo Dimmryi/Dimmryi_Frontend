@@ -16,11 +16,18 @@ import {
 import { RootState } from '../store/store';
 import { setTweak } from '../store/tweaksSlice';
 import { useLanguage } from '../LanguageProvider';
+import { useAuth } from '../services/useAuth';
+import { resetFilter } from '../features/filter/filterSlice';
+import { resetMapFilter } from '../features/filterMap/filterMapSlice';
+import { resetNotificationProperty } from '../features/notification/notificationSlice';
+import { setScrollY } from '../features/scroll/scrollSlice';
+import { clearImages } from '../features/upLoadImages/upLoadImagesSlice';
 
 export function Home() {
     const dispatch = useDispatch();
     const tweaks = useSelector((state: RootState) => state.tweaks.values);
     const { translate } = useLanguage();
+    const { handleResetUserData } = useAuth();
 
     useEffect(() => {
         document.documentElement.style.setProperty('--accent', tweaks.accent);
@@ -35,8 +42,22 @@ export function Home() {
         dispatch(setTweak({ [key]: value }));
     };
 
+    const handleDevReset = async () => {
+        await handleResetUserData();
+        dispatch(resetFilter());
+        dispatch(resetMapFilter());
+        dispatch(resetNotificationProperty());
+        dispatch(setScrollY(0));
+        dispatch(clearImages());
+        localStorage.removeItem('scrollPosition');
+        localStorage.removeItem('coordsCache');
+    };
+
     return (
         <>
+            <button className="dm-dev-reset" onClick={handleDevReset}>
+                🔄 DEV: Reset all state
+            </button>
             {tweaks.showHero && <Hero accent={tweaks.accent} />}
             <MapSection accent={tweaks.accent} />
             <Featured />

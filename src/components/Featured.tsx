@@ -13,7 +13,7 @@ export const Featured = () => {
                     <div className="dm-eyebrow">{translate('featured.eyebrow')}</div>
                     <h2 className="dm-h2">{translate('featured.title')}</h2>
                 </div>
-                <a href="#" className="dm-link">
+                <a href="/listings" className="dm-link">
                     {translate('featured.allRecommendations')} {Icons.arrow()}
                 </a>
             </div>

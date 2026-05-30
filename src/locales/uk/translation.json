@@ -6,9 +6,12 @@
         "buy": "Купити",
         "rent": "Орендувати",
         "newBuild": "Новобудови",
+        "services": "Послуги",
         "agents": "Ріелтори",
         "about": "Про нас",
         "login": "Увійти",
+        "register": "Зареєструватись",
+        "profile": "Мій профіль",
         "post": "+ Розмістити",
         "languageSwitch": "UA · EN"
     },
