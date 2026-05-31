@@ -73,27 +73,26 @@ const Login: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { handleAuthSuccess, API_URL } = useAuth();
+  const routeState = location.state as { notice?: string; from?: string; prefilledEmail?: string; suggestedMethod?: string } | null;
 
-  const [email, setEmail] = useState<string>((location.state as { prefilledEmail?: string } | null)?.prefilledEmail || '');
+  const [email, setEmail] = useState<string>(routeState?.prefilledEmail || '');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [status, setStatus] = useState<LoginStatus>('idle');
   const [errorMessage, setErrorMessage] = useState('');
 
   useEffect(() => {
-    const state = location.state as { suggestedMethod?: string; from?: string } | null;
-    if (state?.suggestedMethod === 'google') {
+    if (routeState?.suggestedMethod === 'google') {
       setErrorMessage(texts.errors.googleEmailWithGoogle);
       setStatus('wrong_method');
     }
-  }, [location.state, texts.errors.googleEmailWithGoogle]);
+  }, [routeState?.suggestedMethod, texts.errors.googleEmailWithGoogle]);
 
   useEffect(() => {
     if (isRegistration && isAuthenticated) {
-      const state = location.state as { from?: string } | null;
-      navigate(state?.from || '/', { replace: true });
+      navigate(routeState?.from || '/', { replace: true });
     }
-  }, [isRegistration, isAuthenticated, location.state, navigate]);
+  }, [isRegistration, isAuthenticated, routeState?.from, navigate]);
 
   const resetForm = () => {
     if (status !== 'idle') {
@@ -205,6 +204,9 @@ const Login: React.FC = () => {
           <h1>{texts.title}</h1>
           <p className="dm-reg__subtitle">{texts.subtitle}</p>
 
+          {routeState?.notice && status === 'idle' && (
+            <div className="dm-reg__banner dm-reg__banner--info">{routeState.notice}</div>
+          )}
           {hasError && <div className="dm-reg__banner dm-reg__banner--error">{errorMessage}</div>}
           {status === 'success' && <div className="dm-reg__banner dm-reg__banner--success">{texts.success}</div>}
 

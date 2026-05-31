@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { GoogleLogin } from '@react-oauth/google';
 import { useSelector } from 'react-redux';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useLanguage } from '../LanguageProvider';
 import { useAuth } from '../services/useAuth';
 import type { RootState } from '../store/store';
@@ -128,7 +128,9 @@ const Registration: React.FC = () => {
   const texts = copy[language === 'en' ? 'en' : 'uk'];
   const isRegistration = useSelector((state: RootState) => state.registration.isRegistered);
   const navigate = useNavigate();
+  const location = useLocation();
   const { handleAuthSuccess, API_URL } = useAuth();
+  const routeState = location.state as { notice?: string; from?: string } | null;
 
   const [formData, setFormData] = useState<FormData>({ name: '', email: '', password: '' });
   const [status, setStatus] = useState<FormStatus>('idle');
@@ -144,7 +146,7 @@ const Registration: React.FC = () => {
   const onAuthSuccess = (data: { user: { id: string; name: string; email: string }; message?: string }) => {
     setSuccessMessage(data.message || texts.errors.successMessage);
     setStatus('success');
-    handleAuthSuccess(data);
+    handleAuthSuccess(data, routeState?.from || '/');
   };
 
   const onDuplicateAccount = (email: string) => {
@@ -340,6 +342,9 @@ const Registration: React.FC = () => {
             {texts.registration[11]} - {texts.registration[4]}
           </p>
 
+          {routeState?.notice && status === 'idle' && (
+            <div className="dm-reg__banner dm-reg__banner--info">{routeState.notice}</div>
+          )}
           {renderBanner()}
           {status === 'duplicate_account' && renderDuplicateBlock()}
           {status === 'forgot_sent' && renderForgotSentBlock()}

@@ -7,13 +7,38 @@ import { useLanguage } from '../LanguageProvider';
 
 const PAGE_SIZE = 18;
 
+const parseNumber = (value: number | string | undefined) => {
+  if (value === undefined || value === null || value === '') return 0;
+  const parsed = Number(String(value).replace(/[^\d.]/g, ''));
+  return Number.isFinite(parsed) ? parsed : 0;
+};
+
+const includesText = (source: string | undefined, search: string) =>
+  !search || String(source || '').toLowerCase().includes(search.toLowerCase());
+
 export default function Listings() {
   const { translate } = useLanguage();
   const [searchParams, setSearchParams] = useSearchParams();
   const [listings, setListings] = useState<Listing[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+
   const currentPage = Math.max(1, Number(searchParams.get('page') ?? '1'));
+  const filters = useMemo(
+    () => ({
+      listingType: searchParams.get('listingType') || '',
+      propertyType: searchParams.get('propertyType') || '',
+      minPrice: searchParams.get('minPrice') || '',
+      maxPrice: searchParams.get('maxPrice') || '',
+      novelty: searchParams.get('novelty') || 'newToOld',
+      location: searchParams.get('location') || '',
+      rooms: searchParams.get('rooms') || '',
+      minArea: searchParams.get('minArea') || '',
+      maxArea: searchParams.get('maxArea') || '',
+      typeOfNovelty: searchParams.get('typeOfNovelty') || '',
+    }),
+    [searchParams],
+  );
 
   useEffect(() => {
     let alive = true;
@@ -34,15 +59,55 @@ export default function Listings() {
     };
   }, []);
 
-  const totalPages = Math.max(1, Math.ceil(listings.length / PAGE_SIZE));
+  const filteredListings = useMemo(() => {
+    const minPrice = filters.minPrice ? Number(filters.minPrice) : 0;
+    const maxPrice = filters.maxPrice ? Number(filters.maxPrice) : Number.POSITIVE_INFINITY;
+    const minArea = filters.minArea ? Number(filters.minArea) : 0;
+    const maxArea = filters.maxArea ? Number(filters.maxArea) : Number.POSITIVE_INFINITY;
+
+    return listings
+      .filter((listing) => {
+        const price = parseNumber(listing.price);
+        const area = Number(listing.totalArea || 0);
+        const rooms = Number(listing.numbersOfRooms || 0);
+        const targetRooms = filters.rooms === '5+' ? 5 : Number(filters.rooms || 0);
+
+        return (
+          price >= minPrice &&
+          price <= maxPrice &&
+          area >= minArea &&
+          area <= maxArea &&
+          (!filters.listingType || listing.listingType === filters.listingType) &&
+          (!filters.propertyType || listing.propertyType === filters.propertyType) &&
+          (!filters.typeOfNovelty || listing.typeOfNovelty === filters.typeOfNovelty) &&
+          (!filters.rooms || (filters.rooms === '5+' ? rooms >= targetRooms : rooms === targetRooms)) &&
+          includesText(listing.location, filters.location)
+        );
+      })
+      .sort((a, b) => {
+        const aDate = Number(a.date || 0);
+        const bDate = Number(b.date || 0);
+        return filters.novelty === 'oldToNew' ? aDate - bDate : bDate - aDate;
+      });
+  }, [filters, listings]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredListings.length / PAGE_SIZE));
   const displayedListings = useMemo(
-    () => listings.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE),
-    [currentPage, listings],
+    () => filteredListings.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE),
+    [currentPage, filteredListings],
   );
+
+  const activeFilterCount = Object.entries(filters).filter(([key, value]) => value && !(key === 'novelty' && value === 'newToOld')).length;
 
   const handlePageChange = (page: number) => {
     const nextPage = Math.min(Math.max(1, page), totalPages);
-    setSearchParams(nextPage === 1 ? {} : { page: String(nextPage) });
+    const nextParams = new URLSearchParams(searchParams);
+    if (nextPage === 1) {
+      nextParams.delete('page');
+    } else {
+      nextParams.set('page', String(nextPage));
+    }
+    setSearchParams(nextParams);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -54,11 +119,20 @@ export default function Listings() {
             <div className="dm-eyebrow">Listings</div>
             <h1 className="dm-h2">{translate('featured.allRecommendations')}</h1>
           </div>
+          {!loading && !error && (
+            <div className="dm-listings-summary">
+              <strong>{filteredListings.length}</strong>
+              <span>{activeFilterCount ? `за вибраними фільтрами: ${activeFilterCount}` : 'усього доступно'}</span>
+            </div>
+          )}
         </div>
 
         {loading && <div className="dm-listings-status">Завантаження...</div>}
         {error && <div className="dm-listings-status is-error">{error}</div>}
-        {!loading && !error && (
+        {!loading && !error && filteredListings.length === 0 && (
+          <div className="dm-listings-status">За цими фільтрами оголошень поки немає.</div>
+        )}
+        {!loading && !error && filteredListings.length > 0 && (
           <>
             <ul className="dm-listings-grid">
               {displayedListings.map((listing) => (
