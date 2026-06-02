@@ -17,7 +17,7 @@ const services: ServiceItem[] = [
     titleEn: 'List a property',
     descriptionUk: 'Створення оголошення з фото, описом, ціною та контактами власника.',
     descriptionEn: 'Create a listing with photos, description, price, and owner contacts.',
-    href: '/listings/new/sale',
+    href: '/listings/new',
     icon: 'home',
     tier: 'free',
   },

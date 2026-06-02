@@ -56,6 +56,17 @@ const readStoredEmail = () => {
 
 const toNumber = (value: string) => (value === '' ? 0 : Number(value));
 
+const requiredRangeFields = [
+    'minNumbersOfRoom',
+    'maxNumbersOfRoom',
+    'minTotalArea',
+    'maxTotalArea',
+    'minFloor',
+    'maxFloor',
+    'minPrice',
+    'maxPrice',
+] as const;
+
 const chipGroups = [
     {
         label: 'Операція',
@@ -202,26 +213,52 @@ const Notification = () => {
 
     const handleSubmit = async (event: FormEvent) => {
         event.preventDefault();
-        setIsSaving(true);
         setErrorMessage('');
         setSaveMessage('');
 
+        const hasMissingRequiredFields =
+            !formData.listingType ||
+            !formData.propertyType ||
+            !formData.typeOfNovelty ||
+            !formData.locationSought.trim() ||
+            !formData.email.trim() ||
+            requiredRangeFields.some((field) => formData[field] === '');
+
+        if (hasMissingRequiredFields) {
+            setErrorMessage('Заповніть тип угоди, тип нерухомості, фонд, усі діапазони, локацію та email.');
+            return;
+        }
+
+        const notificationPayload = {
+            ...formData,
+            minNumbersOfRoom: toNumber(formData.minNumbersOfRoom),
+            maxNumbersOfRoom: toNumber(formData.maxNumbersOfRoom),
+            minTotalArea: toNumber(formData.minTotalArea),
+            maxTotalArea: toNumber(formData.maxTotalArea),
+            minFloor: toNumber(formData.minFloor),
+            maxFloor: toNumber(formData.maxFloor),
+            minPrice: toNumber(formData.minPrice),
+            maxPrice: toNumber(formData.maxPrice),
+        };
+
+        setIsSaving(true);
+
         dispatch(
             setNotificationProperty({
-                listingType: formData.listingType,
-                propertyType: formData.propertyType,
-                typeOfNovelty: formData.typeOfNovelty,
-                minNumbersOfRoom: toNumber(formData.minNumbersOfRoom),
-                maxNumbersOfRoom: toNumber(formData.maxNumbersOfRoom),
-                minTotalArea: toNumber(formData.minTotalArea),
-                maxTotalArea: toNumber(formData.maxTotalArea),
-                minFloor: toNumber(formData.minFloor),
-                maxFloor: toNumber(formData.maxFloor),
-                minPrice: toNumber(formData.minPrice),
-                maxPrice: toNumber(formData.maxPrice),
-                location: formData.locationSought,
-                locationRange: formData.locationRange,
-                email: formData.email,
+                listingType: notificationPayload.listingType,
+                propertyType: notificationPayload.propertyType,
+                typeOfNovelty: notificationPayload.typeOfNovelty,
+                minNumbersOfRoom: notificationPayload.minNumbersOfRoom,
+                maxNumbersOfRoom: notificationPayload.maxNumbersOfRoom,
+                minTotalArea: notificationPayload.minTotalArea,
+                maxTotalArea: notificationPayload.maxTotalArea,
+                minFloor: notificationPayload.minFloor,
+                maxFloor: notificationPayload.maxFloor,
+                minPrice: notificationPayload.minPrice,
+                maxPrice: notificationPayload.maxPrice,
+                location: notificationPayload.locationSought,
+                locationRange: notificationPayload.locationRange,
+                email: notificationPayload.email,
             }),
         );
 
@@ -232,7 +269,7 @@ const Notification = () => {
                     method: isEditMode ? 'PUT' : 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     credentials: 'include',
-                    body: JSON.stringify(formData),
+                    body: JSON.stringify(notificationPayload),
                 },
             );
 

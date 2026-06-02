@@ -65,7 +65,7 @@ const MyNotification = () => {
             return () => controller.abort();
         }
 
-        const url = isAdmin ? `${API_URL}/notifications` : `${API_URL}/api/notifications/authorId/${userId}`;
+        const url = isAdmin ? `${API_URL}/api/notifications` : `${API_URL}/api/notifications/authorId/${userId}`;
 
         setError('');
         setIsLoading(true);

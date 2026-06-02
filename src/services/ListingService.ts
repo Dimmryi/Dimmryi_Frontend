@@ -23,11 +23,45 @@ export const addListingWithComparison = async (listingData: Record<string, unkno
             credentials: 'include',
             body: JSON.stringify(listingData),
         });
-        return response.json();
+        const data = await response.json().catch(() => null);
+        if (!response.ok) {
+            throw new Error(data?.message || data?.error || `Failed to add listing: ${response.status}`);
+        }
+        if (data?.success === false || data?.error) {
+            throw new Error(data.message || data.error || 'Failed to add listing.');
+        }
+        return data;
     } catch (error) {
         console.error('Added Listing error:', error);
         throw error;
     }
+};
+
+export const fetchListingById = async (listingId: string) => {
+    const response = await fetch(`${API_URL}/api/listings/${encodeURIComponent(listingId)}`, {
+        credentials: 'include',
+    });
+    const data = await response.json().catch(() => null);
+    if (!response.ok) {
+        throw new Error(data?.message || data?.error || `Failed to fetch listing: ${response.status}`);
+    }
+
+    return Array.isArray(data) ? data[0] : data;
+};
+
+export const updateListing = async (listingId: string, listingData: Record<string, unknown>) => {
+    const response = await fetch(`${API_URL}/api/listing/${encodeURIComponent(listingId)}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify(listingData),
+    });
+    const data = await response.json().catch(() => null);
+    if (!response.ok) {
+        throw new Error(data?.message || data?.error || `Failed to update listing: ${response.status}`);
+    }
+
+    return data;
 };
 
 export const handleDeleteListingByUserName = async (userName: string) => {

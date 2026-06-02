@@ -12,6 +12,7 @@ interface LeafletListingsMapProps {
     filter: IFilterMapState;
     activeId?: string;
     expanded?: boolean;
+    command?: { type: 'zoomIn' | 'zoomOut' | 'locate'; id: number } | null;
     onPick: (listing: Listing) => void;
 }
 
@@ -86,12 +87,15 @@ const makeCenterIcon = () =>
         iconAnchor: [9, 9],
     });
 
-const LeafletListingsMap = ({ listings, filter, activeId, expanded = false, onPick }: LeafletListingsMapProps) => {
+const LeafletListingsMap = ({ listings, filter, activeId, expanded = false, command, onPick }: LeafletListingsMapProps) => {
     const containerRef = useRef<HTMLDivElement>(null);
     const mapRef = useRef<L.Map | null>(null);
     const markerGroupRef = useRef<L.FeatureGroup | null>(null);
+    const markerByIdRef = useRef<Map<string, L.Marker>>(new Map());
+    const markerListingByIdRef = useRef<Map<string, Listing>>(new Map());
     const circleRef = useRef<L.Circle | null>(null);
     const centerMarkerRef = useRef<L.Marker | null>(null);
+    const activeIdRef = useRef(activeId);
     const onPickRef = useRef(onPick);
     const [isResolving, setIsResolving] = useState(false);
 
@@ -106,6 +110,13 @@ const LeafletListingsMap = ({ listings, filter, activeId, expanded = false, onPi
     }, [onPick]);
 
     useEffect(() => {
+        activeIdRef.current = activeId;
+        markerListingByIdRef.current.forEach((listing, id) => {
+            markerByIdRef.current.get(id)?.setIcon(makePriceIcon(listing, id === activeId));
+        });
+    }, [activeId]);
+
+    useEffect(() => {
         if (!containerRef.current || mapRef.current) return;
 
         const map = L.map(containerRef.current, {
@@ -113,7 +124,8 @@ const LeafletListingsMap = ({ listings, filter, activeId, expanded = false, onPi
             attributionControl: true,
         }).setView([49.0, 31.0], 6);
 
-        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+            className: 'dm-map-blue-tile-layer',
             maxZoom: 19,
             attribution:
                 '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
@@ -135,16 +147,46 @@ const LeafletListingsMap = ({ listings, filter, activeId, expanded = false, onPi
 
     useEffect(() => {
         const map = mapRef.current;
+        if (!map || !command) return;
+
+        if (command.type === 'zoomIn') {
+            map.zoomIn();
+            return;
+        }
+
+        if (command.type === 'zoomOut') {
+            map.zoomOut();
+            return;
+        }
+
+        if (command.type === 'locate' && navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition((position) => {
+                const coords: Coordinates = {
+                    lat: position.coords.latitude,
+                    lon: position.coords.longitude,
+                };
+
+                if (centerMarkerRef.current) map.removeLayer(centerMarkerRef.current);
+                centerMarkerRef.current = L.marker([coords.lat, coords.lon], { icon: makeCenterIcon() }).addTo(map);
+                map.setView([coords.lat, coords.lon], Math.max(map.getZoom(), 13));
+            });
+        }
+    }, [command]);
+
+    useEffect(() => {
+        const map = mapRef.current;
         if (!map) return;
 
         let cancelled = false;
 
         const render = async () => {
             const parsedFilter = JSON.parse(filterKey) as IFilterMapState;
-            const isFilterEmpty = !parsedFilter.destination && !parsedFilter.listingType && !parsedFilter.propertyType;
-            const effectiveRange = isFilterEmpty ? Infinity : parsedFilter.rangeValue || 20;
+            const hasDestinationFilter = Boolean(parsedFilter.destination);
+            const effectiveRange = hasDestinationFilter ? parsedFilter.rangeValue || 20 : Infinity;
 
             setIsResolving(true);
+            markerByIdRef.current.clear();
+            markerListingByIdRef.current.clear();
 
             let center: Coordinates = { lat: 49.0, lon: 31.0 };
             let zoom = 6;
@@ -166,17 +208,19 @@ const LeafletListingsMap = ({ listings, filter, activeId, expanded = false, onPi
             const missing: Listing[] = [];
 
             const passes = (listing: Listing, coords: Coordinates) =>
-                haversineKm(center.lat, center.lon, coords.lat, coords.lon) <= effectiveRange &&
+                (!hasDestinationFilter || haversineKm(center.lat, center.lon, coords.lat, coords.lon) <= effectiveRange) &&
                 (!parsedFilter.listingType || listing.listingType === parsedFilter.listingType) &&
                 (!parsedFilter.propertyType || listing.propertyType === parsedFilter.propertyType);
 
             const addMarker = (listing: Listing, coords: Coordinates) => {
                 if (!passes(listing, coords)) return;
                 const marker = L.marker([coords.lat, coords.lon], {
-                    icon: makePriceIcon(listing, listing._id === activeId),
+                    icon: makePriceIcon(listing, listing._id === activeIdRef.current),
                 });
 
                 marker.on('click', () => onPickRef.current(listing));
+                markerByIdRef.current.set(listing._id, marker);
+                markerListingByIdRef.current.set(listing._id, listing);
                 visibleMarkers.push(marker);
             };
 
@@ -205,7 +249,7 @@ const LeafletListingsMap = ({ listings, filter, activeId, expanded = false, onPi
             markerGroupRef.current = L.featureGroup(visibleMarkers).addTo(map);
             map.setView([center.lat, center.lon], zoom);
 
-            if (!isFilterEmpty) {
+            if (hasDestinationFilter) {
                 circleRef.current = L.circle([center.lat, center.lon], {
                     radius: effectiveRange * 1000,
                     color: '#f5a623',
@@ -228,9 +272,11 @@ const LeafletListingsMap = ({ listings, filter, activeId, expanded = false, onPi
                     cache[listing.location] = coords;
                     if (!cancelled && passes(listing, coords)) {
                         const marker = L.marker([coords.lat, coords.lon], {
-                            icon: makePriceIcon(listing, listing._id === activeId),
+                            icon: makePriceIcon(listing, listing._id === activeIdRef.current),
                         });
                         marker.on('click', () => onPickRef.current(listing));
+                        markerByIdRef.current.set(listing._id, marker);
+                        markerListingByIdRef.current.set(listing._id, listing);
                         markerGroupRef.current?.addLayer(marker);
                     }
                 }
@@ -248,7 +294,7 @@ const LeafletListingsMap = ({ listings, filter, activeId, expanded = false, onPi
             cancelled = true;
             setIsResolving(false);
         };
-    }, [activeId, filterKey, listings, listingsKey]);
+    }, [filterKey, listings, listingsKey]);
 
     return (
         <>

@@ -1,5 +1,7 @@
 import { Link } from 'react-router-dom';
 import { useLanguage } from '../LanguageProvider';
+import { Icons } from './Icons';
+import { useFavorites } from '../hooks/useFavorites';
 
 export interface Listing {
   _id: string;
@@ -11,6 +13,8 @@ export interface Listing {
   description?: string;
   price: number | string;
   image?: Array<string | null>;
+  video?: Array<string | null>;
+  videoUrl?: string;
   contact?: string;
   location: string;
   numbersOfRooms?: number;
@@ -59,6 +63,7 @@ const labels = {
 
 const ListingCard = ({ listing, scrollY = 0, onSaveScroll = () => undefined }: ListingCardProps) => {
   const { language } = useLanguage();
+  const { isFavorite, toggleFavorite } = useFavorites();
   const t = labels[language === 'en' ? 'en' : 'uk'];
 
   const coverImage = listing.image?.find((img): img is string => Boolean(img)) ?? null;
@@ -73,6 +78,9 @@ const ListingCard = ({ listing, scrollY = 0, onSaveScroll = () => undefined }: L
     month: 'short',
     year: 'numeric',
   });
+  const saved = isFavorite(listing._id);
+  const saveLabel = language === 'en' ? 'Save listing' : 'Зберегти оголошення';
+  const savedLabel = language === 'en' ? 'Saved listing' : 'Збережене оголошення';
 
   return (
     <li className="dm-listing-card">
@@ -86,6 +94,15 @@ const ListingCard = ({ listing, scrollY = 0, onSaveScroll = () => undefined }: L
         <span className={`dm-listing-card__badge ${isRent ? 'is-rent' : 'is-sale'}`}>{isRent ? t.rent : t.sale}</span>
         {listing.typeOfNovelty === 'newBuilding' && <span className="dm-listing-card__new">{t.newBuilding}</span>}
       </Link>
+      <button
+        className={'dm-listing-card__fav ' + (saved ? 'is-active' : '')}
+        type="button"
+        onClick={() => toggleFavorite(listing._id)}
+        aria-label={saved ? savedLabel : saveLabel}
+        title={saved ? savedLabel : saveLabel}
+      >
+        {Icons.heart()}
+      </button>
 
       <div className="dm-listing-card__body">
         <div className="dm-listing-card__meta">

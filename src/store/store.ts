@@ -8,6 +8,7 @@ import filterReducer from '../features/filter/filterSlice';
 import filterMapReducer from '../features/filterMap/filterMapSlice';
 import scrollReducer from '../features/scroll/scrollSlice';
 import notificationReducer from '../features/notification/notificationSlice';
+import favoritesReducer from '../features/favorites/favoritesSlice';
 
 export const store = configureStore({
     reducer: {
@@ -20,6 +21,7 @@ export const store = configureStore({
         filterMap: filterMapReducer,
         scroll: scrollReducer,
         notification: notificationReducer,
+        favorites: favoritesReducer,
     },
     middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(registrationMiddleware),
 });

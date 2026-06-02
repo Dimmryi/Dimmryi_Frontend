@@ -7,9 +7,9 @@ import DetailsMap from '../components/DetailsMap';
 import { useLanguage } from '../LanguageProvider';
 import { useAppSelector, useIsAdmin } from '../app/hooks';
 import { fetchListings } from '../services/ListingService';
+import { useFavorites } from '../hooks/useFavorites';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-const FAVORITES_STORAGE_KEY = 'favoriteListings';
 
 interface DetailsListing extends Listing {
     owner?: string;
@@ -25,20 +25,26 @@ interface ReviewComment {
     timePublication: string;
 }
 
-const readFavoriteIds = () => {
-    try {
-        const parsed = JSON.parse(localStorage.getItem(FAVORITES_STORAGE_KEY) || '[]');
-        return Array.isArray(parsed) ? parsed.filter((item): item is string => typeof item === 'string') : [];
-    } catch {
-        return [];
-    }
+type GalleryItem = {
+    type: 'image' | 'video';
+    url: string;
 };
 
 const getListingTitle = (listing?: DetailsListing | null) =>
     listing?.title || listing?.apartmentDetails?.slice(0, 72) || listing?.description?.slice(0, 72) || "Об'єкт нерухомості";
 
-const getGallery = (listing?: DetailsListing | null) =>
-    listing?.image?.filter((item): item is string => Boolean(item)) ?? [];
+const getGallery = (listing?: DetailsListing | null): GalleryItem[] => {
+    const images = listing?.image?.filter((item): item is string => Boolean(item)).map((url) => ({ type: 'image' as const, url })) ?? [];
+    const videos = listing?.video?.filter((item): item is string => Boolean(item)).map((url) => ({ type: 'video' as const, url })) ?? [];
+    const legacyVideo = listing?.videoUrl ? [{ type: 'video' as const, url: listing.videoUrl }] : [];
+    const uniqueVideos = [...videos, ...legacyVideo].filter(
+        (item, index, items) => items.findIndex((candidate) => candidate.url === item.url) === index,
+    );
+
+    return [...images, ...uniqueVideos];
+};
+
+const isVideoMedia = (item?: GalleryItem) => item?.type === 'video';
 
 const formatPrice = (price: number | string) => {
     const numeric = Number(String(price).replace(/[^\d.]/g, ''));
@@ -87,12 +93,12 @@ const Details = () => {
     const navigate = useNavigate();
     const { translate } = useLanguage();
     const isAdmin = useIsAdmin();
+    const { isFavorite: isFavoriteListing, toggleFavorite } = useFavorites();
     const { isRegistered, userName, userId } = useAppSelector((state) => state.registration);
     const [listing, setListing] = useState<DetailsListing | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
-    const [activeImage, setActiveImage] = useState(0);
-    const [favoriteIds, setFavoriteIds] = useState<string[]>(() => readFavoriteIds());
+    const [activeMedia, setActiveMedia] = useState(0);
     const [comments, setComments] = useState<ReviewComment[]>([]);
     const [comment, setComment] = useState('');
     const [rating, setRating] = useState('');
@@ -142,7 +148,7 @@ const Details = () => {
     }, [listingId]);
 
     useEffect(() => {
-        setActiveImage(0);
+        setActiveMedia(0);
     }, [listing?._id]);
 
     useEffect(() => {
@@ -164,22 +170,15 @@ const Details = () => {
     }, [listingId, reviewMessage]);
 
     const gallery = useMemo(() => getGallery(listing), [listing]);
-    const currentImage = gallery[activeImage] || gallery[0] || '';
-    const isFavorite = listing?._id ? favoriteIds.includes(listing._id) : false;
+    const currentMedia = gallery[activeMedia] || gallery[0] || null;
+    const isFavorite = isFavoriteListing(listing?._id);
     const isOwnListing = Boolean(
         userId && listing && (listing.ownerId === userId || (!listing.ownerId && listing.owner && listing.owner === userName)),
     );
     const canAdminDeleteOwner = Boolean(isAdmin && listing && !isOwnListing && (listing.ownerId || listing.owner));
 
-    const toggleFavorite = () => {
-        if (!listing?._id) return;
-        setFavoriteIds((current) => {
-            const next = current.includes(listing._id)
-                ? current.filter((id) => id !== listing._id)
-                : [...current, listing._id];
-            localStorage.setItem(FAVORITES_STORAGE_KEY, JSON.stringify(next));
-            return next;
-        });
+    const handleToggleFavorite = () => {
+        toggleFavorite(listing?._id);
     };
 
     const handleSubmitReview = async (event: FormEvent) => {
@@ -298,7 +297,7 @@ const Details = () => {
                         <button
                             className={'dm-btn dm-btn--ghost dm-btn--sm ' + (isFavorite ? 'is-active' : '')}
                             type="button"
-                            onClick={toggleFavorite}
+                            onClick={handleToggleFavorite}
                         >
                             {Icons.heart()} {isFavorite ? 'Збережено' : 'Зберегти'}
                         </button>
@@ -312,8 +311,30 @@ const Details = () => {
                     <div className="dm-details-primary">
                         <div className="dm-details-gallery">
                             <div className="dm-details-gallery__hero">
-                                {currentImage ? (
-                                    <img src={currentImage} alt={getListingTitle(listing)} />
+                                {currentMedia ? (
+                                    isVideoMedia(currentMedia) ? (
+                                        <video
+                                            className="dm-details-gallery__video"
+                                            src={currentMedia.url}
+                                            controls
+                                            playsInline
+                                            preload="metadata"
+                                        />
+                                    ) : (
+                                        <div className="dm-details-gallery__image-frame">
+                                            <img
+                                                className="dm-details-gallery__blur"
+                                                src={currentMedia.url}
+                                                alt=""
+                                                aria-hidden="true"
+                                            />
+                                            <img
+                                                className="dm-details-gallery__main-image"
+                                                src={currentMedia.url}
+                                                alt={getListingTitle(listing)}
+                                            />
+                                        </div>
+                                    )
                                 ) : (
                                     <PlaceholderImage label={listing.propertyType || 'property'} tone="warm" />
                                 )}
@@ -325,14 +346,26 @@ const Details = () => {
                             </div>
                             {gallery.length > 1 ? (
                                 <div className="dm-details-gallery__thumbs">
-                                    {gallery.map((image, index) => (
+                                    {gallery.map((item, index) => (
                                         <button
-                                            key={`${image}-${index}`}
+                                            key={`${item.type}-${item.url}-${index}`}
                                             type="button"
-                                            className={'dm-details-thumb ' + (index === activeImage ? 'is-active' : '')}
-                                            onClick={() => setActiveImage(index)}
+                                            className={'dm-details-thumb ' + (index === activeMedia ? 'is-active' : '')}
+                                            onClick={() => setActiveMedia(index)}
+                                            aria-label={
+                                                isVideoMedia(item)
+                                                    ? `Показати відео ${index + 1}`
+                                                    : `Показати фото ${index + 1}`
+                                            }
                                         >
-                                            <img src={image} alt={`${getListingTitle(listing)} ${index + 1}`} />
+                                            {isVideoMedia(item) ? (
+                                                <>
+                                                    <video src={item.url} muted playsInline preload="metadata" />
+                                                    <span className="dm-details-thumb__play" aria-hidden="true" />
+                                                </>
+                                            ) : (
+                                                <img src={item.url} alt={`${getListingTitle(listing)} ${index + 1}`} />
+                                            )}
                                         </button>
                                     ))}
                                 </div>
@@ -504,7 +537,7 @@ const Details = () => {
 
                         <section className="dm-details-section">
                             <h2 className="dm-details-section__title">Розташування на мапі</h2>
-                            <DetailsMap location={listing.location} title={getListingTitle(listing)} />
+                            <DetailsMap location={listing.location} />
                         </section>
                     </aside>
                 </div>

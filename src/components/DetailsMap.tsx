@@ -8,7 +8,6 @@ type Coordinates = { lat: number; lon: number };
 
 interface DetailsMapProps {
     location: string;
-    title: string;
 }
 
 const readCoordsCache = (): Record<string, Coordinates> => {
@@ -42,7 +41,7 @@ const makeMarkerIcon = () =>
         iconAnchor: [9, 9],
     });
 
-const DetailsMap = ({ location, title }: DetailsMapProps) => {
+const DetailsMap = ({ location }: DetailsMapProps) => {
     const containerRef = useRef<HTMLDivElement>(null);
     const mapRef = useRef<L.Map | null>(null);
     const markerRef = useRef<L.Marker | null>(null);
@@ -57,7 +56,8 @@ const DetailsMap = ({ location, title }: DetailsMapProps) => {
             attributionControl: true,
         }).setView([50.4501, 30.5234], 11);
 
-        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+            className: 'dm-map-blue-tile-layer',
             maxZoom: 19,
             attribution:
                 '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
@@ -109,9 +109,9 @@ const DetailsMap = ({ location, title }: DetailsMapProps) => {
 
             markerRef.current = L.marker([resolvedCoords.lat, resolvedCoords.lon], { icon: makeMarkerIcon() })
                 .addTo(map)
-                .bindPopup(`<strong>${title}</strong><br/>${location}`);
+                .bindPopup(`<strong>${location}</strong>`);
 
-            map.setView([resolvedCoords.lat, resolvedCoords.lon], 13, { animate: true });
+            map.setView([resolvedCoords.lat, resolvedCoords.lon], 14, { animate: true });
             markerRef.current.openPopup();
             setIsResolving(false);
         };
@@ -121,7 +121,7 @@ const DetailsMap = ({ location, title }: DetailsMapProps) => {
         return () => {
             cancelled = true;
         };
-    }, [location, title]);
+    }, [location]);
 
     return (
         <div className="dm-details-map-wrap">

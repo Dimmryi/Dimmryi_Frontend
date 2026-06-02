@@ -9,6 +9,7 @@ import type { Listing } from './ListingCard';
 import { fetchListings } from '../services/ListingService';
 import { useAppDispatch, useAppSelector } from '../app/hooks';
 import { resetMapFilter, setFilterFeatures } from '../features/filterMap/filterMapSlice';
+import { useFavorites } from '../hooks/useFavorites';
 
 const LeafletListingsMap = lazy(() => import('./LeafletListingsMap'));
 
@@ -17,9 +18,10 @@ interface MapSectionProps {
 }
 
 type FilterMode = 'all' | 'sale' | 'rent';
+type MapCommandType = 'zoomIn' | 'zoomOut' | 'locate';
+type MapCommand = { type: MapCommandType; id: number };
 
 const MAP_ROOM_OPTIONS = [0, 1, 2, 3, 4, '5+'] as const;
-const FAVORITES_STORAGE_KEY = 'favoriteListings';
 
 const mockListingFromProperty = (property: Property): Listing => ({
     _id: `mock-${property.id}`,
@@ -44,23 +46,15 @@ const parseListingPrice = (price: number | string) => {
     return Number.isFinite(parsed) ? parsed : 0;
 };
 
-const readFavoriteIds = () => {
-    try {
-        const parsed = JSON.parse(localStorage.getItem(FAVORITES_STORAGE_KEY) || '[]');
-        return Array.isArray(parsed) ? parsed.filter((item): item is string => typeof item === 'string') : [];
-    } catch {
-        return [];
-    }
-};
-
 export const MapSection = ({ accent }: MapSectionProps) => {
     const { translate } = useLanguage();
     const dispatch = useAppDispatch();
     const mapFilter = useAppSelector((state) => state.filterMap);
+    const { favoriteIds, toggleFavorite } = useFavorites();
 
-    const [filtersOpen, setFiltersOpen] = useState(true);
-    const [infoOpen, setInfoOpen] = useState(true);
-    const [active, setActive] = useState<string>('mock-2');
+    const [filtersOpen, setFiltersOpen] = useState(false);
+    const [infoOpen, setInfoOpen] = useState(false);
+    const [active, setActive] = useState<string>('');
     const [filterMode, setFilterMode] = useState<FilterMode>('all');
     const [priceMin, setPriceMin] = useState(0);
     const [priceMax, setPriceMax] = useState(0);
@@ -69,8 +63,8 @@ export const MapSection = ({ accent }: MapSectionProps) => {
     const [areaMax, setAreaMax] = useState('');
     const [showMoreChips, setShowMoreChips] = useState(false);
     const [newBuildOnly, setNewBuildOnly] = useState(false);
-    const [favoriteIds, setFavoriteIds] = useState<string[]>(() => readFavoriteIds());
     const [expanded, setExpanded] = useState(false);
+    const [mapCommand, setMapCommand] = useState<MapCommand | null>(null);
     const [mapListings, setMapListings] = useState<Listing[]>([]);
     const [mapError, setMapError] = useState('');
 
@@ -105,8 +99,8 @@ export const MapSection = ({ accent }: MapSectionProps) => {
     }, [areaMax, areaMin, beds, filterMode, listingsForMap, mapFilter.propertyType, newBuildOnly, priceMax, priceMin]);
 
     const activeListing = useMemo(
-        () => filtered.find((listing) => listing._id === active) || filtered[0] || listingsForMap[0],
-        [active, filtered, listingsForMap],
+        () => (active ? filtered.find((listing) => listing._id === active) : undefined),
+        [active, filtered],
     );
 
     const coverImage = getListingCover(activeListing);
@@ -139,8 +133,6 @@ export const MapSection = ({ accent }: MapSectionProps) => {
         setPriceMax((current) => (current <= 0 ? absoluteMaxPrice : Math.min(current, absoluteMaxPrice)));
     }, [absoluteMaxPrice]);
 
-    if (!activeListing) return null;
-
     const chipOptions = [
         { k: 'all' as const, l: translate('mapSection.filters.all'), n: listingsForMap.length },
         { k: 'sale' as const, l: translate('mapSection.filters.sale'), n: listingsForMap.filter((p) => p.listingType === 'sale').length },
@@ -167,13 +159,11 @@ export const MapSection = ({ accent }: MapSectionProps) => {
 
     const handleToggleFavorite = () => {
         if (!activeListing?._id) return;
-        setFavoriteIds((current) => {
-            const next = current.includes(activeListing._id)
-                ? current.filter((id) => id !== activeListing._id)
-                : [...current, activeListing._id];
-            localStorage.setItem(FAVORITES_STORAGE_KEY, JSON.stringify(next));
-            return next;
-        });
+        toggleFavorite(activeListing._id);
+    };
+
+    const sendMapCommand = (type: MapCommandType) => {
+        setMapCommand({ type, id: Date.now() });
     };
 
     const handleResetMapFilter = () => {
@@ -211,6 +201,7 @@ export const MapSection = ({ accent }: MapSectionProps) => {
                             filter={mapFilter}
                             activeId={active}
                             expanded={expanded}
+                            command={mapCommand}
                             onPick={(listing) => {
                                 setActive(listing._id);
                                 setInfoOpen(true);
@@ -261,23 +252,29 @@ export const MapSection = ({ accent }: MapSectionProps) => {
                     </div>
 
                     <div className="dm-map__controls">
-                        <button className="dm-mctl" title={translate('mapSection.controls.expand')} onClick={() => setExpanded((current) => !current)}>
+                        <button
+                            className="dm-mctl"
+                            type="button"
+                            title={translate('mapSection.controls.expand')}
+                            onClick={() => setExpanded((current) => !current)}
+                        >
                             {Icons.expand()}
                         </button>
                         <div className="dm-mctl-stack">
-                            <button className="dm-mctl">{Icons.plus()}</button>
+                            <button className="dm-mctl" type="button" onClick={() => sendMapCommand('zoomIn')}>
+                                {Icons.plus()}
+                            </button>
                             <div className="dm-mctl__divider" />
-                            <button className="dm-mctl">{Icons.minus()}</button>
+                            <button className="dm-mctl" type="button" onClick={() => sendMapCommand('zoomOut')}>
+                                {Icons.minus()}
+                            </button>
                         </div>
-                        <button className="dm-mctl" title={translate('mapSection.controls.layers')}>
-                            {Icons.layers()}
-                        </button>
-                        <button className="dm-mctl" title={translate('mapSection.controls.position')}>
+                        <button className="dm-mctl" type="button" title={translate('mapSection.controls.position')} onClick={() => sendMapCommand('locate')}>
                             {Icons.loc()}
                         </button>
                     </div>
 
-                    {!filtersOpen && (
+                    {!filtersOpen && !infoOpen && (
                         <button className="dm-map__tab dm-map__tab--left" onClick={() => setFiltersOpen(true)}>
                             {Icons.filter()}
                             <span>{translate('mapSection.tabs.filters')}</span>
@@ -285,7 +282,7 @@ export const MapSection = ({ accent }: MapSectionProps) => {
                         </button>
                     )}
 
-                    {!infoOpen && (
+                    {!infoOpen && !filtersOpen && (
                         <button className="dm-map__tab dm-map__tab--right" onClick={() => setInfoOpen(true)}>
                             {Icons.info()}
                             <span>{translate('mapSection.tabs.info')}</span>
@@ -494,7 +491,7 @@ export const MapSection = ({ accent }: MapSectionProps) => {
                                 <span className="dm-panel__icon">{Icons.info()}</span>
                                 <div>
                                     <div className="dm-panel__h">{translate('mapSection.tabs.info')}</div>
-                                    <div className="dm-panel__sub">{activeListing.location}</div>
+                                    <div className="dm-panel__sub">{activeListing?.location || 'Оберіть об’єкт на мапі'}</div>
                                 </div>
                             </div>
                             <button className="dm-iconbtn" onClick={() => setInfoOpen(false)}>
@@ -503,6 +500,8 @@ export const MapSection = ({ accent }: MapSectionProps) => {
                         </div>
 
                         <div className="dm-panel__body dm-panel__body--info">
+                            {activeListing ? (
+                                <>
                             <div className="dm-prop-card">
                                 <div className="dm-prop-card__media">
                                     <Link className="dm-prop-card__media-link" to={`/details/${activeListing._id}`} aria-label="Детальніше">
@@ -574,6 +573,14 @@ export const MapSection = ({ accent }: MapSectionProps) => {
                                     Детальніше
                                 </Link>
                             </div>
+                                </>
+                            ) : (
+                                <div className="dm-info-empty" aria-live="polite">
+                                    <div className="dm-info-empty__icon">{Icons.info()}</div>
+                                    <div className="dm-info-empty__title">Об’єкт не вибрано</div>
+                                    <p>Натисніть на маркер на карті, щоб побачити деталі оголошення.</p>
+                                </div>
+                            )}
                         </div>
                     </aside>
                 </div>

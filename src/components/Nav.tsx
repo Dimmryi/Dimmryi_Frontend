@@ -24,13 +24,14 @@ type IconName =
     | 'services'
     | 'user'
     | 'plus'
+    | 'heart'
     | 'bell'
     | 'message'
     | 'logout'
     | 'globe'
     | 'chevron';
 
-const CREATE_LISTING_PATH = '/listings/new/sale';
+const CREATE_LISTING_PATH = '/listings/new';
 
 const NavIcon = ({ name }: { name: IconName }) => {
     const common = {
@@ -54,6 +55,7 @@ const NavIcon = ({ name }: { name: IconName }) => {
         services: <><rect x="4" y="4" width="7" height="7" rx="1.5" /><rect x="13" y="4" width="7" height="7" rx="1.5" /><rect x="4" y="13" width="7" height="7" rx="1.5" /><rect x="13" y="13" width="7" height="7" rx="1.5" /></>,
         user: <><circle cx="12" cy="8" r="4" /><path d="M4 21a8 8 0 0 1 16 0" /></>,
         plus: <><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></>,
+        heart: <path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z" />,
         bell: <><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9" /><path d="M10 21h4" /></>,
         message: <path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4z" />,
         logout: <><path d="M10 17l5-5-5-5" /><path d="M15 12H3" /><path d="M21 3v18" /></>,
@@ -96,6 +98,7 @@ export const Nav = () => {
     ];
 
     const accountLinks = [
+        { label: 'Обране', to: '/favorites', icon: 'heart' as const },
         { label: 'Мої оголошення', to: '/my-listings', icon: 'home' as const },
         { label: 'Мої коментарі', to: '/my-comments', icon: 'message' as const },
         { label: 'Мої сповіщення', to: '/my-notifications', icon: 'bell' as const },
@@ -123,6 +126,7 @@ export const Nav = () => {
                     localStorage.setItem('sessionExpiry', String(nextExpiry));
                     setSessionExpiry(nextExpiry);
                 }
+                localStorage.setItem('user', JSON.stringify(user));
                 dispatch(setAuthProperty(true));
                 dispatch(setIsRegistration(true));
                 dispatch(setUserName(user.name));
