@@ -1249,6 +1249,44 @@ select {
   font-size: 13px;
   line-height: 1.55;
 }
+.dm-notification-gate {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding-top: 0;
+  padding-bottom: 34px;
+}
+.dm-notification-gate > div {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  padding: 18px;
+}
+.dm-notification-gate span {
+  display: block;
+  color: var(--accent);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.dm-notification-gate h2,
+.dm-notification-gate p {
+  margin: 0;
+}
+.dm-notification-gate h2 {
+  margin-top: 8px;
+  font-family: var(--font-display);
+  font-size: 24px;
+  font-weight: 500;
+}
+.dm-notification-gate p {
+  max-width: 760px;
+  margin-top: 8px;
+  color: var(--text-2);
+  line-height: 1.55;
+}
 .dm-notification-layout {
   display: grid;
   grid-template-columns: minmax(0, 1.1fr) minmax(320px, 0.75fr);
@@ -1269,6 +1307,9 @@ select {
   display: grid;
   gap: 22px;
   padding: 24px;
+}
+.dm-notification-form.is-locked {
+  opacity: 0.64;
 }
 .dm-form-block {
   display: grid;
@@ -4795,6 +4836,10 @@ select {
   .dm-my-notifications-head,
   .dm-my-listings-head {
     align-items: start;
+    flex-direction: column;
+  }
+  .dm-notification-gate {
+    align-items: stretch;
     flex-direction: column;
   }
   .dm-notification-ranges,

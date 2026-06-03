@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '../app/hooks';
 import { setNotificationProperty } from '../features/notification/notificationSlice';
 import { Icons } from '../components/Icons';
+import { useSubscription } from '../hooks/useSubscription';
 
 type NotificationForm = {
     listingType: string;
@@ -109,6 +110,8 @@ const Notification = () => {
     const dispatch = useAppDispatch();
     const userId = useAppSelector((state) => state.registration.userId);
     const subscribeType = useAppSelector((state) => state.registration.subscribeType);
+    const { canUseStandard, isAdmin } = useSubscription();
+    const canManageNotifications = canUseStandard || isAdmin;
 
     const initialEmail = useMemo(readStoredEmail, []);
     const [formData, setFormData] = useState<NotificationForm>(() => emptyForm(initialEmail, userId));
@@ -216,6 +219,11 @@ const Notification = () => {
         setErrorMessage('');
         setSaveMessage('');
 
+        if (!canManageNotifications) {
+            setErrorMessage('Email-сповіщення доступні для активної підписки Standard або Premium.');
+            return;
+        }
+
         const hasMissingRequiredFields =
             !formData.listingType ||
             !formData.propertyType ||
@@ -297,14 +305,31 @@ const Notification = () => {
                 <div className="dm-notification-note">
                     <Icons.info />
                     <div>
-                        <strong>{subscribeType === 'Free' ? 'Сервіс для Standard/Premium' : 'Доступ активний'}</strong>
-                        <span>Обмеження підписки перенесемо окремо разом із тарифами. Зараз форма відкрита для тестування.</span>
+                        <strong>{canManageNotifications ? 'Доступ активний' : 'Сервіс для Standard/Premium'}</strong>
+                        <span>
+                            {canManageNotifications
+                                ? subscribeType === 'Standard'
+                                    ? 'Standard дозволяє 1 активний запит. Premium дозволяє кілька запитів. Для кожного email діє ліміт 4 листи за 24 години.'
+                                    : 'Premium дозволяє створювати кілька запитів. Для кожного email діє ліміт 4 листи за 24 години.'
+                                : 'Оформіть Standard або Premium, щоб отримувати листи, коли нове оголошення відповідає вашим критеріям.'}
+                        </span>
                     </div>
                 </div>
             </section>
 
+            {!canManageNotifications && (
+                <section className="dm-section dm-notification-gate">
+                    <div>
+                        <span>Потрібна підписка</span>
+                        <h2>Автоматичні email-сповіщення доступні з тарифу Standard</h2>
+                        <p>Після активації підписки ви зможете зберегти параметри пошуку і отримувати листи з відповідними новими оголошеннями.</p>
+                    </div>
+                    <Link className="dm-btn dm-btn--accent" to="/subscription">Перейти до тарифів</Link>
+                </section>
+            )}
+
             <section className="dm-section dm-notification-layout">
-                <form className="dm-notification-form" onSubmit={handleSubmit}>
+                <form className={canManageNotifications ? 'dm-notification-form' : 'dm-notification-form is-locked'} onSubmit={handleSubmit}>
                     {chipGroups.map((group) => (
                         <div className="dm-form-block" key={group.name}>
                             <label>{group.label}</label>
@@ -397,7 +422,7 @@ const Notification = () => {
                         </div>
                     )}
 
-                    <button className="dm-btn dm-btn--accent dm-btn--lg" type="submit" disabled={isSaving}>
+                    <button className="dm-btn dm-btn--accent dm-btn--lg" type="submit" disabled={isSaving || !canManageNotifications}>
                         {isSaving ? 'Зберігаю...' : isEditMode ? 'Оновити сповіщення' : 'Створити сповіщення'}
                     </button>
                 </form>
