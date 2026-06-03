@@ -92,6 +92,7 @@ export const Nav = () => {
 
     const serviceLinks = [
         { label: 'Усі сервіси', to: '/services', icon: 'services' as const },
+        { label: 'Рієлтори', to: '/agents', icon: 'user' as const },
         { label: 'AI-оцінка', to: '/real-estate-estimator', icon: 'search' as const },
         { label: 'Сповіщення', to: '/notification', icon: 'bell' as const },
         { label: 'Договір', to: '/agreement', icon: 'message' as const },
@@ -99,6 +100,7 @@ export const Nav = () => {
 
     const accountLinks = [
         { label: 'Обране', to: '/favorites', icon: 'heart' as const },
+        { label: 'Мій профіль рієлтора', to: '/my-agent', icon: 'user' as const },
         { label: 'Мої оголошення', to: '/my-listings', icon: 'home' as const },
         { label: 'Мої коментарі', to: '/my-comments', icon: 'message' as const },
         { label: 'Мої сповіщення', to: '/my-notifications', icon: 'bell' as const },

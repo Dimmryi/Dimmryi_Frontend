@@ -13,6 +13,8 @@ const Listings = lazy(() => import('./pages/Listings'));
 const ListingForm = lazy(() => import('./pages/ListingForm'));
 const Details = lazy(() => import('./pages/Details'));
 const Favorites = lazy(() => import('./pages/Favorites'));
+const Agents = lazy(() => import('./pages/Agents'));
+const MyAgentProfile = lazy(() => import('./pages/MyAgentProfile'));
 const AccountPlaceholder = lazy(() => import('./pages/AccountPlaceholder'));
 const Services = lazy(() => import('./pages/Services'));
 const Agreement = lazy(() => import('./pages/Agreement'));
@@ -46,6 +48,7 @@ function App() {
                             <Route path="listings" element={<Listings />} />
                             <Route path="details/:listingId" element={<Details />} />
                             <Route path="favorites" element={<Favorites />} />
+                            <Route path="my-agent" element={<MyAgentProfile />} />
                             <Route path="listings/new" element={<ListingForm />} />
                             <Route path="listings/edit/:listingId" element={<ListingForm />} />
                             <Route path="services" element={<Services />} />
@@ -54,7 +57,7 @@ function App() {
                             <Route path="advertising" element={<AccountPlaceholder title="Рекламне відео" />} />
                             <Route path="notification" element={<Notification />} />
                             <Route path="notification/edit/:notificationId" element={<Notification />} />
-                            <Route path="agents" element={<AccountPlaceholder title="Рієлтори" />} />
+                            <Route path="agents" element={<Agents />} />
                             <Route path="about" element={<AccountPlaceholder title="Про нас" />} />
                             <Route path="promotion-your-listing" element={<AccountPlaceholder title="Просування оголошення" />} />
                             <Route path="subscription" element={<AccountPlaceholder title="Тарифи та підписки" />} />
