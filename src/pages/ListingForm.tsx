@@ -54,6 +54,11 @@ interface ExistingListing {
     };
 }
 
+type Coordinates = {
+    lat: number;
+    lon: number;
+};
+
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 const CLOUD_NAME = import.meta.env.VITE_CLOUD_NAME || '';
 const PRESET_VALUE = import.meta.env.VITE_PRESET_VALUE || '';
@@ -96,6 +101,36 @@ const extractListingId = (response: Record<string, unknown> | null | undefined) 
     const listing = response?.listing as { _id?: string; id?: string } | undefined;
     const createdListing = response?.createdListing as { _id?: string; id?: string } | undefined;
     return listing?._id || listing?.id || createdListing?._id || createdListing?.id || (response?._id as string | undefined) || (response?.id as string | undefined);
+};
+
+const hasUsableCoords = ({ lat, lon }: Coordinates) =>
+    Number.isFinite(lat) && Number.isFinite(lon) && !(lat === 0 && lon === 0);
+
+const geocodeAddress = async (address: string): Promise<Coordinates> => {
+    const trimmedAddress = address.trim();
+    if (!trimmedAddress) {
+        throw new Error('Вкажіть адресу перед перевіркою.');
+    }
+
+    const response = await fetch(
+        `https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(trimmedAddress)}`,
+    );
+    const data = await response.json();
+
+    if (!response.ok || !Array.isArray(data) || !data.length || !data[0]?.lat || !data[0]?.lon) {
+        throw new Error('Адресу не знайдено. Спробуйте уточнити місто або вулицю.');
+    }
+
+    const coords = {
+        lat: Number(data[0].lat),
+        lon: Number(data[0].lon),
+    };
+
+    if (!hasUsableCoords(coords)) {
+        throw new Error('Не вдалося визначити координати адреси.');
+    }
+
+    return coords;
 };
 
 const findRecentlyCreatedListingId = async (ownerId: string, payload: FormState) => {
@@ -324,6 +359,9 @@ export default function ListingForm() {
     };
 
     const handleInputChange = (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+        if (event.target.name === 'location' && event.target.value !== form.location) {
+            setCoords({ lat: 0, lon: 0 });
+        }
         updateForm(event.target.name as keyof FormState, event.target.value);
     };
 
@@ -395,17 +433,11 @@ export default function ListingForm() {
         }
 
         try {
-            const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(form.location)}`);
-            const data = await response.json();
-            if (!Array.isArray(data) || !data.length) {
-                setMessage({ type: 'error', text: 'Адресу не знайдено. Спробуйте уточнити місто або вулицю.' });
-                return;
-            }
-            const nextCoords = { lat: Number(data[0].lat), lon: Number(data[0].lon) };
+            const nextCoords = await geocodeAddress(form.location);
             setCoords(nextCoords);
             setMessage({ type: 'success', text: 'Адресу знайдено. Координати додано до оголошення.' });
-        } catch {
-            setMessage({ type: 'error', text: 'Не вдалося перевірити адресу.' });
+        } catch (error) {
+            setMessage({ type: 'error', text: error instanceof Error ? error.message : 'Не вдалося перевірити адресу.' });
         }
     };
 
@@ -435,20 +467,33 @@ export default function ListingForm() {
             return;
         }
 
-        const payload = {
-            ...form,
-            email: payloadEmail,
-            owner: payloadOwner,
-            ownerId: payloadOwnerId,
-            image: images.map((image) => image.url),
-            video: videoAsset ? [videoAsset.url] : [],
-            videoUrl: videoAsset?.url || '',
-            lat: String(coords.lat),
-            lon: String(coords.lon),
-        };
-
         try {
             setIsSubmitting(true);
+            let submitCoords = coords;
+            const existingLocation = String(existingListing?.location || '').trim();
+            const currentLocation = form.location.trim();
+            const shouldGeocode =
+                !hasUsableCoords(submitCoords) ||
+                (isEditMode && Boolean(existingLocation) && existingLocation !== currentLocation);
+
+            if (shouldGeocode) {
+                setMessage({ type: 'info', text: 'Перевіряю адресу та координати перед публікацією.' });
+                submitCoords = await geocodeAddress(currentLocation);
+                setCoords(submitCoords);
+            }
+
+            const payload = {
+                ...form,
+                email: payloadEmail,
+                owner: payloadOwner,
+                ownerId: payloadOwnerId,
+                image: images.map((image) => image.url),
+                video: videoAsset ? [videoAsset.url] : [],
+                videoUrl: videoAsset?.url || '',
+                lat: String(submitCoords.lat),
+                lon: String(submitCoords.lon),
+            };
+
             if (isEditMode && listingId) {
                 const response = await updateListing(listingId, payload);
                 setMessage({ type: 'success', text: response?.message || 'Оголошення успішно оновлено.' });
