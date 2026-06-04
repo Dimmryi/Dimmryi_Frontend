@@ -1,5 +1,5 @@
 import { ChangeEvent, FormEvent, useEffect, useMemo, useState } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { addListingWithComparison, fetchListingById, updateListing } from '../services/ListingService';
 import { Icons } from '../components/Icons';
@@ -78,6 +78,8 @@ const initialForm = (listingType: ListingType): FormState => ({
     location: '',
     price: '',
 });
+
+const getListingTypeFromParam = (value: string | null): ListingType => (value === 'rent' ? 'rent' : 'sale');
 
 const isPrivilegedMediaUser = (subscribeType: string, role: string | null) =>
     role === 'admin' || subscribeType === 'Standard' || subscribeType === 'Premium';
@@ -215,8 +217,10 @@ const deleteFromCloudinary = async (asset: MediaAsset, resourceType: 'image' | '
 export default function ListingForm() {
     const navigate = useNavigate();
     const { listingId } = useParams<{ listingId?: string }>();
+    const [searchParams] = useSearchParams();
     const isEditMode = Boolean(listingId);
-    const listingFormPath = isEditMode && listingId ? `/listings/edit/${listingId}` : '/listings/new';
+    const preferredListingType = getListingTypeFromParam(searchParams.get('listingType'));
+    const listingFormPath = isEditMode && listingId ? `/listings/edit/${listingId}` : `/listings/new?listingType=${preferredListingType}`;
     const isRegistered = useSelector((state: RootState) => state.registration.isRegistered);
     const role = useSelector((state: RootState) => state.registration.role);
     const ownerName = useSelector((state: RootState) => state.registration.userName);
@@ -227,7 +231,7 @@ export default function ListingForm() {
     const canUseExtendedMedia = isPrivilegedMediaUser(subscribeType, role);
     const imageLimit = canUseExtendedMedia ? 8 : 6;
 
-    const [form, setForm] = useState<FormState>(() => initialForm('sale'));
+    const [form, setForm] = useState<FormState>(() => initialForm(preferredListingType));
     const [images, setImages] = useState<MediaAsset[]>([]);
     const [videoAsset, setVideoAsset] = useState<MediaAsset | null>(null);
     const [existingListing, setExistingListing] = useState<ExistingListing | null>(null);
@@ -238,6 +242,11 @@ export default function ListingForm() {
     const [message, setMessage] = useState<{ type: 'success' | 'error' | 'info'; text: string } | null>(null);
     const sessionExpiry = Number(localStorage.getItem('sessionExpiry') || 0);
     const isSessionAlive = isAuthenticated && sessionExpiry > Date.now();
+
+    useEffect(() => {
+        if (isEditMode) return;
+        setForm((prev) => (prev.listingType === preferredListingType ? prev : { ...prev, listingType: preferredListingType }));
+    }, [isEditMode, preferredListingType]);
 
     useEffect(() => {
         if (authChecking) return;

@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import { PlaceholderImage } from './PlaceholderImage';
 import { useLanguage } from '../LanguageProvider';
 
@@ -15,8 +16,12 @@ export const ListCta = () => {
                     </h2>
                     <p className="dm-cta__lede">{translate('listCta.lede')}</p>
                     <div className="dm-cta__row">
-                        <button className="dm-btn dm-btn--accent dm-btn--lg">{translate('listCta.buttons.rent')}</button>
-                        <button className="dm-btn dm-btn--light dm-btn--lg">{translate('listCta.buttons.sell')}</button>
+                        <Link className="dm-btn dm-btn--accent dm-btn--lg" to="/listings/new?listingType=rent">
+                            {translate('listCta.buttons.rent')}
+                        </Link>
+                        <Link className="dm-btn dm-btn--light dm-btn--lg" to="/listings/new?listingType=sale">
+                            {translate('listCta.buttons.sell')}
+                        </Link>
                     </div>
                     <div className="dm-cta__meta">
                         <span>{translate('listCta.meta.rating')}</span>
