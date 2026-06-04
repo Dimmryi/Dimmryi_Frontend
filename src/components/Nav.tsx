@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState, type ReactNode } from 'react';
-import { Link, NavLink, useNavigate } from 'react-router-dom';
+import { useEffect, useMemo, useState, type MouseEvent, type ReactNode } from 'react';
+import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { useLanguage } from '../LanguageProvider';
 import { useAuth } from '../services/useAuth';
@@ -69,6 +69,7 @@ const NavIcon = ({ name }: { name: IconName }) => {
 export const Nav = () => {
     const { language, setLanguage, translate } = useLanguage();
     const navigate = useNavigate();
+    const location = useLocation();
     const dispatch = useDispatch();
     const { checkAuth, handleResetUserData } = useAuth();
     const [isProfileOpen, setIsProfileOpen] = useState(false);
@@ -178,6 +179,14 @@ export const Nav = () => {
         window.setTimeout(() => {
             document.getElementById('map')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }, 150);
+    };
+
+    const handleBrandClick = (event: MouseEvent<HTMLAnchorElement>) => {
+        closeMenus();
+        if (location.pathname === '/') {
+            event.preventDefault();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
     };
 
     const handleLogout = async () => {
@@ -302,7 +311,7 @@ export const Nav = () => {
 
     return (
         <nav className="dm-nav">
-            <Link className="dm-nav__brand" to="/" onClick={closeMenus}>
+            <Link className="dm-nav__brand" to="/" onClick={handleBrandClick}>
                 <div className="dm-nav__logo" aria-hidden>
                     <svg viewBox="0 0 32 32" width="28" height="28">
                         <path d="M5 16 L16 6 L27 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />

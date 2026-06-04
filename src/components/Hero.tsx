@@ -4,6 +4,7 @@ import { PlaceholderImage } from './PlaceholderImage';
 import { Icons } from './Icons';
 import { useLanguage } from '../LanguageProvider';
 import { fetchListings } from '../services/ListingService';
+import { fetchAgents } from '../services/AgentService';
 
 interface HeroProps {
     accent: string;
@@ -38,6 +39,8 @@ export const Hero = ({ accent }: HeroProps) => {
     const [tab, setTab] = useState<HeroTab>('buy');
     const [showMoreFilters, setShowMoreFilters] = useState(false);
     const [listingCount, setListingCount] = useState<number | null>(null);
+    const [todayListingCount, setTodayListingCount] = useState<number | null>(null);
+    const [agentCount, setAgentCount] = useState<number | null>(null);
     const [form, setForm] = useState({
         location: '',
         listingType: 'sale',
@@ -53,13 +56,33 @@ export const Hero = ({ accent }: HeroProps) => {
 
     useEffect(() => {
         let alive = true;
+        const todayStart = new Date();
+        todayStart.setHours(0, 0, 0, 0);
 
         fetchListings()
             .then((data) => {
-                if (alive) setListingCount(Array.isArray(data) ? data.length : 0);
+                if (!alive) return;
+                const listings = Array.isArray(data) ? data : [];
+                setListingCount(listings.length);
+                setTodayListingCount(
+                    listings.filter((listing) => {
+                        const published = Number(listing.date);
+                        return Number.isFinite(published) && published >= todayStart.getTime();
+                    }).length,
+                );
             })
             .catch(() => {
-                if (alive) setListingCount(null);
+                if (!alive) return;
+                setListingCount(null);
+                setTodayListingCount(null);
+            });
+
+        fetchAgents()
+            .then((data) => {
+                if (alive) setAgentCount(Array.isArray(data) ? data.length : 0);
+            })
+            .catch(() => {
+                if (alive) setAgentCount(null);
             });
 
         return () => {
@@ -76,10 +99,14 @@ export const Hero = ({ accent }: HeroProps) => {
 
     const stats = [
         { n: listingCount === null ? '...' : listingCount.toLocaleString('uk-UA'), l: translate('hero.stats.offers') },
-        { n: '384', l: translate('hero.stats.agents') },
+        { n: agentCount === null ? '...' : agentCount.toLocaleString('uk-UA'), l: translate('hero.stats.agents') },
         { n: '98%', l: translate('hero.stats.satisfied') },
         { n: '24 год', l: translate('hero.stats.response') },
     ];
+    const heroEyebrow =
+        listingCount === null
+            ? translate('hero.eyebrow')
+            : `${listingCount.toLocaleString('uk-UA')} актуальних пропозицій · ${(todayListingCount ?? 0).toLocaleString('uk-UA')} додано сьогодні`;
 
     const tabDefaults = useMemo(
         () => ({
@@ -111,6 +138,10 @@ export const Hero = ({ accent }: HeroProps) => {
         navigate(`/listings${params.toString() ? `?${params.toString()}` : ''}`);
     };
 
+    const handleMapScroll = () => {
+        document.getElementById('map')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    };
+
     return (
         <section className="dm-hero">
             <div className="dm-hero__bg" aria-hidden>
@@ -120,7 +151,7 @@ export const Hero = ({ accent }: HeroProps) => {
 
             <div className="dm-hero__inner">
                 <div className="dm-hero__eyebrow">
-                    <span className="dm-dot" style={{ backgroundColor: accent }} /> {translate('hero.eyebrow')}
+                    <span className="dm-dot" style={{ backgroundColor: accent }} /> {heroEyebrow}
                 </div>
 
                 <h1 className="dm-hero__title">
@@ -251,10 +282,10 @@ export const Hero = ({ accent }: HeroProps) => {
                 </div>
             </div>
 
-            <div className="dm-hero__scroll">
+            <button className="dm-hero__scroll" type="button" onClick={handleMapScroll}>
                 <div className="dm-hero__scroll-line" />
                 <span>{translate('hero.scroll')}</span>
-            </div>
+            </button>
         </section>
     );
 };

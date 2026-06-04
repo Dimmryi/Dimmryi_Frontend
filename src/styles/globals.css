@@ -2593,6 +2593,15 @@ select {
   letter-spacing: 0.12em;
   text-transform: uppercase;
   z-index: 2;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  padding: 0;
+  font: inherit;
+  transition: color 0.18s ease;
+}
+.dm-hero__scroll:hover {
+  color: var(--text);
 }
 .dm-hero__scroll-line {
   width: 1px;
