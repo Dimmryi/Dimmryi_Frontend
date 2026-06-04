@@ -1369,6 +1369,16 @@ select {
 .dm-notification-form input:focus {
   border-color: var(--accent);
 }
+.dm-notification-email-hint {
+  margin: -2px 0 0;
+  border: 1px solid rgba(245, 166, 35, 0.22);
+  border-radius: 10px;
+  background: color-mix(in oklch, var(--accent) 7%, transparent);
+  color: var(--text-2);
+  padding: 10px 12px;
+  font-size: 12px;
+  line-height: 1.55;
+}
 .dm-location-control {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;

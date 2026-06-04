@@ -412,6 +412,9 @@ const Notification = () => {
                             placeholder="name@example.com"
                             required
                         />
+                        <p className="dm-notification-email-hint">
+                            До 4 email-сповіщень на добу для одного email. Це захищає вас від зайвих листів, якщо критерії пошуку занадто широкі.
+                        </p>
                     </div>
 
                     {errorMessage && <p className="dm-form-message is-error">{errorMessage}</p>}
