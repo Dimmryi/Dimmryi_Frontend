@@ -1,4 +1,10 @@
+import { Link } from 'react-router-dom';
 import { useLanguage } from '../LanguageProvider';
+
+interface FooterLink {
+    label: string;
+    to: string;
+}
 
 export const Footer = () => {
     const { translate } = useLanguage();
@@ -34,31 +40,31 @@ export const Footer = () => {
                 <FooterCol
                     h={translate('footer.sections.search')}
                     links={[
-                        translate('footer.links.buyApartment'),
-                        translate('footer.links.rent'),
-                        translate('footer.links.newBuilds'),
-                        translate('footer.links.commercial'),
-                        translate('footer.links.suburbs'),
+                        { label: translate('footer.links.buyApartment'), to: '/listings?listingType=sale&propertyType=flat' },
+                        { label: translate('footer.links.rent'), to: '/listings?listingType=rent' },
+                        { label: translate('footer.links.newBuilds'), to: '/listings?typeOfNovelty=newBuilding' },
+                        { label: translate('footer.links.commercial'), to: '/listings?propertyType=commercial+real+estate' },
+                        { label: translate('footer.links.today'), to: '/listings?today=1' },
                     ]}
                 />
                 <FooterCol
                     h={translate('footer.sections.owners')}
                     links={[
-                        translate('footer.links.list'),
-                        translate('footer.links.tariffs'),
-                        translate('footer.links.verification'),
-                        translate('footer.links.priceAnalytics'),
-                        translate('footer.links.dealSecurity'),
+                        { label: translate('footer.links.list'), to: '/listings/new' },
+                        { label: translate('footer.links.tariffs'), to: '/subscription' },
+                        { label: translate('footer.links.verification'), to: '/services' },
+                        { label: translate('footer.links.priceAnalytics'), to: '/services' },
+                        { label: translate('footer.links.dealSecurity'), to: '/services' },
                     ]}
                 />
                 <FooterCol
                     h={translate('footer.sections.company')}
                     links={[
-                        translate('footer.links.about'),
-                        translate('footer.links.careers'),
-                        translate('footer.links.press'),
-                        translate('footer.links.partners'),
-                        translate('footer.links.contacts'),
+                        { label: translate('footer.links.about'), to: '/services' },
+                        { label: translate('footer.links.careers'), to: '/services' },
+                        { label: translate('footer.links.press'), to: '/services' },
+                        { label: translate('footer.links.partners'), to: '/services' },
+                        { label: translate('footer.links.contacts'), to: '/services' },
                     ]}
                 />
             </div>
@@ -72,7 +78,7 @@ export const Footer = () => {
 
 interface FooterColProps {
     h: string;
-    links: string[];
+    links: FooterLink[];
 }
 
 function FooterCol({ h, links }: FooterColProps) {
@@ -80,9 +86,9 @@ function FooterCol({ h, links }: FooterColProps) {
         <div className="dm-foot__col">
             <div className="dm-foot__h">{h}</div>
             <ul>
-                {links.map((l) => (
-                    <li key={l}>
-                        <a href="#">{l}</a>
+                {links.map((link) => (
+                    <li key={link.label}>
+                        <Link to={link.to}>{link.label}</Link>
                     </li>
                 ))}
             </ul>
