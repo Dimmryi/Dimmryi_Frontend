@@ -4444,6 +4444,7 @@ select {
   padding: 24px;
   transition: all 0.2s;
   position: relative;
+  text-decoration: none;
 }
 .dm-cat:hover {
   transform: translateY(-3px);
@@ -4919,7 +4920,35 @@ select {
     line-height: 1;
   }
   .dm-cats {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+  .dm-cat {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 12px;
+    min-width: 0;
+    padding: 14px;
+  }
+  .dm-cat:nth-child(n + 7) {
+    display: none;
+  }
+  .dm-cat__icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+  }
+  .dm-cat__label {
+    font-size: 15px;
+    line-height: 1.15;
+  }
+  .dm-cat__count {
+    font-size: 11px;
+  }
+  .dm-cat__arrow {
+    position: absolute;
+    right: 12px;
+    top: 14px;
   }
   .dm-panel {
     width: calc(100% - 32px);
