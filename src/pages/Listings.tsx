@@ -16,6 +16,17 @@ const parseNumber = (value: number | string | undefined) => {
 const includesText = (source: string | undefined, search: string) =>
   !search || String(source || '').toLowerCase().includes(search.toLowerCase());
 
+const getTodayStart = () => {
+  const todayStart = new Date();
+  todayStart.setHours(0, 0, 0, 0);
+  return todayStart.getTime();
+};
+
+const isPublishedToday = (date: number | string | undefined) => {
+  const published = Number(date || 0);
+  return Number.isFinite(published) && published >= getTodayStart();
+};
+
 export default function Listings() {
   const { translate } = useLanguage();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -36,6 +47,7 @@ export default function Listings() {
       minArea: searchParams.get('minArea') || '',
       maxArea: searchParams.get('maxArea') || '',
       typeOfNovelty: searchParams.get('typeOfNovelty') || '',
+      today: searchParams.get('today') === '1' ? '1' : '',
     }),
     [searchParams],
   );
@@ -80,6 +92,7 @@ export default function Listings() {
           (!filters.listingType || listing.listingType === filters.listingType) &&
           (!filters.propertyType || listing.propertyType === filters.propertyType) &&
           (!filters.typeOfNovelty || listing.typeOfNovelty === filters.typeOfNovelty) &&
+          (!filters.today || isPublishedToday(listing.date)) &&
           (!filters.rooms || (filters.rooms === '5+' ? rooms >= targetRooms : rooms === targetRooms)) &&
           includesText(listing.location, filters.location)
         );
@@ -98,6 +111,17 @@ export default function Listings() {
   );
 
   const activeFilterCount = Object.entries(filters).filter(([key, value]) => value && !(key === 'novelty' && value === 'newToOld')).length;
+
+  const handleTodayToggle = () => {
+    const nextParams = new URLSearchParams(searchParams);
+    nextParams.delete('page');
+    if (filters.today) {
+      nextParams.delete('today');
+    } else {
+      nextParams.set('today', '1');
+    }
+    setSearchParams(nextParams);
+  };
 
   const handlePageChange = (page: number) => {
     const nextPage = Math.min(Math.max(1, page), totalPages);
@@ -123,6 +147,9 @@ export default function Listings() {
             <div className="dm-listings-summary">
               <strong>{filteredListings.length}</strong>
               <span>{activeFilterCount ? `за вибраними фільтрами: ${activeFilterCount}` : 'усього доступно'}</span>
+              <button className={'dm-listings-today ' + (filters.today ? 'is-active' : '')} type="button" onClick={handleTodayToggle}>
+                Оголошення за сьогодні
+              </button>
             </div>
           )}
         </div>

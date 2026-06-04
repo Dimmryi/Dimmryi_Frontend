@@ -33,14 +33,44 @@ const sortOptions = [
     { value: 'oldToNew', label: 'Спочатку старі' },
 ];
 
+const HERO_METRICS_CACHE_KEY = 'dmHeroMetrics';
+
+const getTodayStart = () => {
+    const todayStart = new Date();
+    todayStart.setHours(0, 0, 0, 0);
+    return todayStart.getTime();
+};
+
+const readCachedMetrics = () => {
+    try {
+        const cached = JSON.parse(localStorage.getItem(HERO_METRICS_CACHE_KEY) || 'null');
+        return {
+            listingCount: Number.isFinite(Number(cached?.listingCount)) ? Number(cached.listingCount) : null,
+            todayListingCount: Number.isFinite(Number(cached?.todayListingCount)) ? Number(cached.todayListingCount) : null,
+            agentCount: Number.isFinite(Number(cached?.agentCount)) ? Number(cached.agentCount) : null,
+        };
+    } catch {
+        return { listingCount: null, todayListingCount: null, agentCount: null };
+    }
+};
+
+const writeCachedMetrics = (metrics: { listingCount?: number | null; todayListingCount?: number | null; agentCount?: number | null }) => {
+    try {
+        const previous = readCachedMetrics();
+        localStorage.setItem(HERO_METRICS_CACHE_KEY, JSON.stringify({ ...previous, ...metrics, updatedAt: Date.now() }));
+    } catch {
+        // Non-critical: counters can still render without localStorage.
+    }
+};
+
 export const Hero = ({ accent }: HeroProps) => {
     const { translate } = useLanguage();
     const navigate = useNavigate();
     const [tab, setTab] = useState<HeroTab>('buy');
     const [showMoreFilters, setShowMoreFilters] = useState(false);
-    const [listingCount, setListingCount] = useState<number | null>(null);
-    const [todayListingCount, setTodayListingCount] = useState<number | null>(null);
-    const [agentCount, setAgentCount] = useState<number | null>(null);
+    const [listingCount, setListingCount] = useState<number | null>(() => readCachedMetrics().listingCount);
+    const [todayListingCount, setTodayListingCount] = useState<number | null>(() => readCachedMetrics().todayListingCount);
+    const [agentCount, setAgentCount] = useState<number | null>(() => readCachedMetrics().agentCount);
     const [form, setForm] = useState({
         location: '',
         listingType: 'sale',
@@ -56,8 +86,7 @@ export const Hero = ({ accent }: HeroProps) => {
 
     useEffect(() => {
         let alive = true;
-        const todayStart = new Date();
-        todayStart.setHours(0, 0, 0, 0);
+        const todayStart = getTodayStart();
 
         fetchListings()
             .then((data) => {
@@ -67,22 +96,30 @@ export const Hero = ({ accent }: HeroProps) => {
                 setTodayListingCount(
                     listings.filter((listing) => {
                         const published = Number(listing.date);
-                        return Number.isFinite(published) && published >= todayStart.getTime();
+                        return Number.isFinite(published) && published >= todayStart;
                     }).length,
                 );
+                writeCachedMetrics({
+                    listingCount: listings.length,
+                    todayListingCount: listings.filter((listing) => {
+                        const published = Number(listing.date);
+                        return Number.isFinite(published) && published >= todayStart;
+                    }).length,
+                });
             })
             .catch(() => {
-                if (!alive) return;
-                setListingCount(null);
-                setTodayListingCount(null);
+                // Keep cached values visible during Render cold starts.
             });
 
         fetchAgents()
             .then((data) => {
-                if (alive) setAgentCount(Array.isArray(data) ? data.length : 0);
+                if (!alive) return;
+                const count = Array.isArray(data) ? data.length : 0;
+                setAgentCount(count);
+                writeCachedMetrics({ agentCount: count });
             })
             .catch(() => {
-                if (alive) setAgentCount(null);
+                // Keep cached values visible during Render cold starts.
             });
 
         return () => {

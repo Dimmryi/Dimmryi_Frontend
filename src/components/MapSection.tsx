@@ -46,6 +46,17 @@ const parseListingPrice = (price: number | string) => {
     return Number.isFinite(parsed) ? parsed : 0;
 };
 
+const getTodayStart = () => {
+    const todayStart = new Date();
+    todayStart.setHours(0, 0, 0, 0);
+    return todayStart.getTime();
+};
+
+const isPublishedToday = (date: number | string | undefined) => {
+    const published = Number(date || 0);
+    return Number.isFinite(published) && published >= getTodayStart();
+};
+
 export const MapSection = ({ accent }: MapSectionProps) => {
     const { translate } = useLanguage();
     const dispatch = useAppDispatch();
@@ -63,6 +74,7 @@ export const MapSection = ({ accent }: MapSectionProps) => {
     const [areaMax, setAreaMax] = useState('');
     const [showMoreChips, setShowMoreChips] = useState(false);
     const [newBuildOnly, setNewBuildOnly] = useState(false);
+    const [todayOnly, setTodayOnly] = useState(false);
     const [expanded, setExpanded] = useState(false);
     const [mapCommand, setMapCommand] = useState<MapCommand | null>(null);
     const [mapListings, setMapListings] = useState<Listing[]>([]);
@@ -93,10 +105,11 @@ export const MapSection = ({ accent }: MapSectionProps) => {
             const matchesPrice = price >= priceMin && price <= priceMax;
             const matchesPropertyType = !mapFilter.propertyType || listing.propertyType === mapFilter.propertyType;
             const matchesNovelty = !newBuildOnly || listing.typeOfNovelty === 'newBuilding';
+            const matchesToday = !todayOnly || isPublishedToday(listing.date);
 
-            return matchesMode && matchesRooms && matchesArea && matchesPrice && matchesPropertyType && matchesNovelty;
+            return matchesMode && matchesRooms && matchesArea && matchesPrice && matchesPropertyType && matchesNovelty && matchesToday;
         });
-    }, [areaMax, areaMin, beds, filterMode, listingsForMap, mapFilter.propertyType, newBuildOnly, priceMax, priceMin]);
+    }, [areaMax, areaMin, beds, filterMode, listingsForMap, mapFilter.propertyType, newBuildOnly, priceMax, priceMin, todayOnly]);
 
     const activeListing = useMemo(
         () => (active ? filtered.find((listing) => listing._id === active) : undefined),
@@ -141,6 +154,7 @@ export const MapSection = ({ accent }: MapSectionProps) => {
 
     const topChipCounts = {
         newBuilding: listingsForMap.filter((listing) => listing.typeOfNovelty === 'newBuilding').length,
+        today: listingsForMap.filter((listing) => isPublishedToday(listing.date)).length,
         flat: listingsForMap.filter((listing) => listing.propertyType === 'flat').length,
         privateHouse: listingsForMap.filter((listing) => listing.propertyType === 'private house').length,
         commercial: listingsForMap.filter((listing) => listing.propertyType === 'commercial real estate').length,
@@ -174,6 +188,7 @@ export const MapSection = ({ accent }: MapSectionProps) => {
         setAreaMin('');
         setAreaMax('');
         setNewBuildOnly(false);
+        setTodayOnly(false);
         setShowMoreChips(false);
         dispatch(resetMapFilter());
     };
@@ -217,6 +232,12 @@ export const MapSection = ({ accent }: MapSectionProps) => {
                             onClick={() => setNewBuildOnly((current) => !current)}
                         >
                             Новобудова <em>{topChipCounts.newBuilding}</em>
+                        </button>
+                        <button
+                            className={'dm-chip dm-chip--solid ' + (todayOnly ? 'is-on' : '')}
+                            onClick={() => setTodayOnly((current) => !current)}
+                        >
+                            Сьогодні <em>{topChipCounts.today}</em>
                         </button>
                         <button
                             className={'dm-chip dm-chip--solid ' + (mapFilter.propertyType === 'flat' ? 'is-on' : '')}
@@ -316,6 +337,25 @@ export const MapSection = ({ accent }: MapSectionProps) => {
                                         { k: 'rent', l: translate('mapSection.filters.rent') },
                                     ]}
                                 />
+                            </FilterGroup>
+
+                            <FilterGroup label="Свіжість">
+                                <div className="dm-pills">
+                                    <button
+                                        type="button"
+                                        className={'dm-pill ' + (!todayOnly ? 'is-on' : '')}
+                                        onClick={() => setTodayOnly(false)}
+                                    >
+                                        Усі
+                                    </button>
+                                    <button
+                                        type="button"
+                                        className={'dm-pill ' + (todayOnly ? 'is-on' : '')}
+                                        onClick={() => setTodayOnly(true)}
+                                    >
+                                        За сьогодні
+                                    </button>
+                                </div>
                             </FilterGroup>
 
                             <FilterGroup label={translate('mapSection.filters.price')}>
