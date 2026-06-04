@@ -21,6 +21,7 @@ const Services = lazy(() => import('./pages/Services'));
 const Agreement = lazy(() => import('./pages/Agreement'));
 const RealEstateEstimator = lazy(() => import('./pages/RealEstateEstimator'));
 const Notification = lazy(() => import('./pages/Notification'));
+const Subscription = lazy(() => import('./pages/Subscription'));
 const MyNotification = lazy(() => import('./components/MyNotification'));
 const MyComments = lazy(() => import('./components/MyComments'));
 const MyListings = lazy(() => import('./components/MyListings'));
@@ -62,7 +63,7 @@ function App() {
                             <Route path="agents" element={<Agents />} />
                             <Route path="about" element={<AccountPlaceholder title="Про нас" />} />
                             <Route path="promotion-your-listing" element={<AccountPlaceholder title="Просування оголошення" />} />
-                            <Route path="subscription" element={<AccountPlaceholder title="Тарифи та підписки" />} />
+                            <Route path="subscription" element={<Subscription />} />
                             <Route path="my-listings" element={<MyListings />} />
                             <Route path="my-comments" element={<MyComments />} />
                             <Route path="my-notifications" element={<MyNotification />} />
