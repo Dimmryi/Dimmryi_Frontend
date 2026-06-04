@@ -175,6 +175,7 @@ const Details = () => {
     const isOwnListing = Boolean(
         userId && listing && (listing.ownerId === userId || (!listing.ownerId && listing.owner && listing.owner === userName)),
     );
+    const canOpenOwnerChat = Boolean(listingId && listing?.ownerId && !isOwnListing);
     const canAdminDeleteOwner = Boolean(isAdmin && listing && !isOwnListing && (listing.ownerId || listing.owner));
 
     const handleToggleFavorite = () => {
@@ -523,6 +524,12 @@ const Details = () => {
                                     <em>Опубліковано</em>
                                 </div>
                             </div>
+
+                            {canOpenOwnerChat ? (
+                                <Link className="dm-details-chat-cta" to={`/chat/${listingId}`}>
+                                    {Icons.info()} Написати власнику
+                                </Link>
+                            ) : null}
 
                             {canAdminDeleteOwner ? (
                                 <button className="dm-admin-danger" type="button" onClick={handleAdminDeleteOwner}>

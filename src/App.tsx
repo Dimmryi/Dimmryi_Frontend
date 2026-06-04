@@ -12,6 +12,7 @@ const Login = lazy(() => import('./components/Login'));
 const Listings = lazy(() => import('./pages/Listings'));
 const ListingForm = lazy(() => import('./pages/ListingForm'));
 const Details = lazy(() => import('./pages/Details'));
+const ChatPage = lazy(() => import('./pages/ChatPage'));
 const Favorites = lazy(() => import('./pages/Favorites'));
 const Agents = lazy(() => import('./pages/Agents'));
 const MyAgentProfile = lazy(() => import('./pages/MyAgentProfile'));
@@ -47,6 +48,7 @@ function App() {
                             <Route path="login" element={<Login />} />
                             <Route path="listings" element={<Listings />} />
                             <Route path="details/:listingId" element={<Details />} />
+                            <Route path="chat/:listingId" element={<ChatPage />} />
                             <Route path="favorites" element={<Favorites />} />
                             <Route path="my-agent" element={<MyAgentProfile />} />
                             <Route path="listings/new" element={<ListingForm />} />
