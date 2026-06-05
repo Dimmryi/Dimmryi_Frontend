@@ -1,6 +1,5 @@
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 const CLOUD_NAME = import.meta.env.VITE_CLOUD_NAME || '';
-const PRESET_VALUE = import.meta.env.VITE_PRESET_VALUE || '';
 
 export type VerificationRequestType = 'owner' | 'representative';
 export type VerificationDocumentType = 'technicalPassport' | 'ownershipExtract' | 'representativeDocument';
@@ -19,15 +18,42 @@ export interface CreateVerificationRequestPayload {
     comment: string;
 }
 
-export const uploadVerificationFile = async (file: File): Promise<VerificationFile> => {
-    if (!CLOUD_NAME || !PRESET_VALUE) {
-        throw new Error('Cloudinary env variables are not configured.');
+interface VerificationUploadSignature {
+    signature: string;
+    timestamp: number;
+    api_key: string;
+    folder: string;
+    upload_preset: string;
+}
+
+const fetchVerificationUploadSignature = async (): Promise<VerificationUploadSignature> => {
+    const response = await fetch(`${API_URL}/api/cloudinary/verification-signature`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+    });
+    const data = await response.json().catch(() => null);
+
+    if (!response.ok) {
+        throw new Error(data?.message || data?.error || `Could not sign verification upload: ${response.status}`);
     }
 
+    return data as VerificationUploadSignature;
+};
+
+export const uploadVerificationFile = async (file: File): Promise<VerificationFile> => {
+    if (!CLOUD_NAME) {
+        throw new Error('Cloudinary cloud name is not configured.');
+    }
+
+    const signedUpload = await fetchVerificationUploadSignature();
     const body = new FormData();
     body.append('file', file);
-    body.append('upload_preset', PRESET_VALUE);
-    body.append('folder', 'verification-documents');
+    body.append('api_key', signedUpload.api_key);
+    body.append('timestamp', String(signedUpload.timestamp));
+    body.append('signature', signedUpload.signature);
+    body.append('upload_preset', signedUpload.upload_preset);
+    body.append('folder', signedUpload.folder);
 
     const response = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/auto/upload`, {
         method: 'POST',
