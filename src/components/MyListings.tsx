@@ -6,7 +6,9 @@ import { Icons } from './Icons';
 import { PlaceholderImage } from './PlaceholderImage';
 import {
     createVerificationRequest,
+    getVerificationFileRulesText,
     uploadVerificationFile,
+    validateVerificationFiles,
     type VerificationDocumentType,
     type VerificationRequestType,
 } from '../services/VerificationService';
@@ -237,6 +239,12 @@ const MyListings = () => {
             return;
         }
 
+        const validationError = validateVerificationFiles(verificationForm.files);
+        if (validationError) {
+            setError(validationError);
+            return;
+        }
+
         setError('');
         setMessage('');
         setVerificationSubmittingId(listing._id);
@@ -396,14 +404,33 @@ const MyListings = () => {
                                                         type="file"
                                                         accept="image/*,.pdf"
                                                         multiple
-                                                        onChange={(event) =>
+                                                        onChange={(event) => {
+                                                            const nextFiles = Array.from(event.target.files || []);
+                                                            const validationError = validateVerificationFiles(nextFiles);
+                                                            if (validationError) {
+                                                                event.target.value = '';
+                                                                setError(validationError);
+                                                                setVerificationForm((current) => ({
+                                                                    ...current,
+                                                                    files: [],
+                                                                }));
+                                                                return;
+                                                            }
+                                                            setError('');
                                                             setVerificationForm((current) => ({
                                                                 ...current,
-                                                                files: Array.from(event.target.files || []),
-                                                            }))
-                                                        }
+                                                                files: nextFiles,
+                                                            }));
+                                                        }}
                                                     />
                                                 </label>
+                                                {verificationForm.files.length ? (
+                                                    <div className="dm-verification-submit__files">
+                                                        {verificationForm.files.map((file) => (
+                                                            <span key={`${file.name}-${file.size}`}>{file.name}</span>
+                                                        ))}
+                                                    </div>
+                                                ) : null}
                                                 <label>
                                                     <span>Коментар для модератора</span>
                                                     <textarea
@@ -417,7 +444,7 @@ const MyListings = () => {
                                                         placeholder="Наприклад: документ підтверджує адресу та площу об’єкта."
                                                     />
                                                 </label>
-                                                <p>Документи зберігаються окремо від фото оголошення і не відображаються публічно.</p>
+                                                <p>{getVerificationFileRulesText(false)} Документи зберігаються окремо від фото оголошення і не відображаються публічно.</p>
                                                 <button
                                                     className="dm-btn dm-btn--accent dm-btn--sm"
                                                     type="button"

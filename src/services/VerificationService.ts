@@ -1,5 +1,8 @@
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 const CLOUD_NAME = import.meta.env.VITE_CLOUD_NAME || '';
+const MAX_VERIFICATION_FILES = 6;
+const MAX_VERIFICATION_FILE_SIZE = 3 * 1024 * 1024;
+const ALLOWED_VERIFICATION_FILE_TYPES = ['application/pdf'];
 
 export type VerificationRequestType = 'owner' | 'representative';
 export type VerificationDocumentType = 'technicalPassport' | 'ownershipExtract' | 'representativeDocument';
@@ -10,6 +13,8 @@ export interface VerificationFile {
     url: string;
     publicId: string;
     resourceType: string;
+    format: string;
+    bytes: number;
     originalName: string;
 }
 
@@ -49,6 +54,33 @@ export interface ReviewVerificationRequestPayload {
     decision: VerificationReviewDecision;
     rejectionReason?: string;
 }
+
+export const getVerificationFileRulesText = (isEnglish = false) =>
+    isEnglish
+        ? 'Upload up to 6 files: images or PDF, up to 3 MB each.'
+        : 'Завантажте до 6 файлів: зображення або PDF, до 3 МБ кожен.';
+
+export const validateVerificationFiles = (files: File[], isEnglish = false) => {
+    if (files.length > MAX_VERIFICATION_FILES) {
+        return isEnglish ? 'Upload no more than 6 files.' : 'Завантажте не більше 6 файлів.';
+    }
+
+    const invalidType = files.find((file) => !file.type.startsWith('image/') && !ALLOWED_VERIFICATION_FILE_TYPES.includes(file.type));
+    if (invalidType) {
+        return isEnglish
+            ? 'Only images and PDF files are allowed.'
+            : 'Можна завантажувати лише зображення та PDF-файли.';
+    }
+
+    const oversized = files.find((file) => file.size > MAX_VERIFICATION_FILE_SIZE);
+    if (oversized) {
+        return isEnglish
+            ? `File "${oversized.name}" is larger than 3 MB.`
+            : `Файл "${oversized.name}" більший за 3 МБ.`;
+    }
+
+    return '';
+};
 
 interface VerificationUploadSignature {
     signature: string;
@@ -101,6 +133,8 @@ export const uploadVerificationFile = async (file: File): Promise<VerificationFi
         url: data.secure_url as string,
         publicId: data.public_id as string,
         resourceType: data.resource_type as string,
+        format: data.format as string,
+        bytes: Number(data.bytes || 0),
         originalName: file.name,
     };
 };
