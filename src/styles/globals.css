@@ -1151,6 +1151,143 @@ select {
 .dm-verification-next h2 {
   margin-top: 6px;
 }
+.dm-verification-submit {
+  display: grid;
+  grid-template-columns: minmax(0, 0.78fr) minmax(340px, 1.22fr);
+  gap: 18px;
+  align-items: start;
+  margin: 18px 0;
+}
+.dm-verification-submit__intro,
+.dm-verification-submit__form,
+.dm-verification-submit__gate {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  padding: 20px;
+}
+.dm-verification-submit__intro span {
+  color: var(--accent);
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.dm-verification-submit__intro h2 {
+  margin: 10px 0 10px;
+  font-size: 24px;
+}
+.dm-verification-submit__intro p,
+.dm-verification-submit__gate p {
+  margin: 0;
+  color: var(--text-2);
+  font-size: 14px;
+  line-height: 1.65;
+}
+.dm-verification-submit__form {
+  display: grid;
+  gap: 12px;
+}
+.dm-verification-submit__form label {
+  display: grid;
+  gap: 7px;
+}
+.dm-verification-submit__form label > span {
+  color: var(--text-3);
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.dm-verification-submit__form select,
+.dm-verification-submit__form textarea,
+.dm-verification-submit__form input[type='file'] {
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text);
+  padding: 11px 12px;
+  font: inherit;
+}
+.dm-verification-submit__form select option {
+  background: #0e1a2e;
+  color: var(--text);
+}
+.dm-verification-submit__form textarea {
+  min-height: 92px;
+  resize: vertical;
+}
+.dm-verification-submit__row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+.dm-verification-submit__selected {
+  display: grid;
+  gap: 5px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface-2);
+  padding: 12px;
+}
+.dm-verification-submit__selected strong {
+  font-size: 14px;
+}
+.dm-verification-submit__selected span {
+  color: var(--accent);
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.dm-verification-submit__selected p {
+  margin: 0;
+  color: var(--text-3);
+  font-size: 13px;
+  line-height: 1.5;
+}
+.dm-verification-submit__files {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+.dm-verification-submit__files span {
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface-2);
+  color: var(--text-2);
+  padding: 7px 10px;
+  font-size: 12px;
+  font-weight: 800;
+}
+.dm-verification-submit__message {
+  margin: 0;
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.5;
+}
+.dm-verification-submit__message.is-info {
+  background: color-mix(in oklch, #9fc4ff 12%, transparent);
+  color: #b8d3ff;
+}
+.dm-verification-submit__message.is-success {
+  background: color-mix(in oklch, #71dfa3 12%, transparent);
+  color: #86ecb4;
+}
+.dm-verification-submit__message.is-error {
+  background: color-mix(in oklch, #ff8b8b 12%, transparent);
+  color: #ffaaa9;
+}
+.dm-verification-submit__gate {
+  display: grid;
+  gap: 12px;
+}
+.dm-verification-submit__gate strong {
+  color: var(--accent);
+}
 
 /* ============================================================
    SUBSCRIPTION
@@ -5218,7 +5355,8 @@ select {
     align-items: start;
   }
   .dm-verification-hero,
-  .dm-verification-layout {
+  .dm-verification-layout,
+  .dm-verification-submit {
     grid-template-columns: 1fr;
   }
   .dm-verification-grid {
@@ -5358,6 +5496,9 @@ select {
   }
   .dm-verification-next .dm-btn {
     width: 100%;
+  }
+  .dm-verification-submit__row {
+    grid-template-columns: 1fr;
   }
   .dm-subscription-status {
     align-items: flex-start;
