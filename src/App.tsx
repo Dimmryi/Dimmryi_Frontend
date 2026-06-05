@@ -19,6 +19,7 @@ const MyAgentProfile = lazy(() => import('./pages/MyAgentProfile'));
 const AccountPlaceholder = lazy(() => import('./pages/AccountPlaceholder'));
 const Services = lazy(() => import('./pages/Services'));
 const Verification = lazy(() => import('./pages/Verification'));
+const AdminVerifications = lazy(() => import('./pages/AdminVerifications'));
 const Agreement = lazy(() => import('./pages/Agreement'));
 const RealEstateEstimator = lazy(() => import('./pages/RealEstateEstimator'));
 const Notification = lazy(() => import('./pages/Notification'));
@@ -57,6 +58,7 @@ function App() {
                             <Route path="listings/edit/:listingId" element={<ListingForm />} />
                             <Route path="services" element={<Services />} />
                             <Route path="verification" element={<Verification />} />
+                            <Route path="admin/verifications" element={<AdminVerifications />} />
                             <Route path="agreement" element={<Agreement />} />
                             <Route path="real-estate-estimator" element={<RealEstateEstimator />} />
                             <Route path="advertising" element={<AccountPlaceholder title="Рекламне відео" />} />

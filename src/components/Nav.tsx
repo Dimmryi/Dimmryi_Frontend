@@ -105,6 +105,7 @@ export const Nav = () => {
         { label: 'Обране', to: '/favorites', icon: 'heart' as const },
         { label: 'Мій профіль рієлтора', to: '/my-agent', icon: 'user' as const },
         { label: 'Мої оголошення', to: '/my-listings', icon: 'home' as const },
+        ...(isAdmin ? [{ label: 'Перевірки', to: '/admin/verifications', icon: 'services' as const }] : []),
         { label: 'Мої коментарі', to: '/my-comments', icon: 'message' as const },
         { label: 'Мої сповіщення', to: '/my-notifications', icon: 'bell' as const },
     ];

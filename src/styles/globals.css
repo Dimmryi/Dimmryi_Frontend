@@ -2499,6 +2499,267 @@ select {
   line-height: 1.5;
 }
 
+.dm-admin-verifications-page {
+  min-height: calc(100vh - 81px);
+  padding: 96px clamp(16px, 4vw, 56px) 56px;
+}
+
+.dm-admin-verifications-page__hero,
+.dm-admin-verifications-page__gate,
+.dm-admin-verification-card {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.dm-admin-verifications-page__hero {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 24px;
+  padding: clamp(20px, 4vw, 34px);
+}
+
+.dm-admin-verifications-page__hero span,
+.dm-admin-verifications-page__gate span {
+  color: var(--accent);
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.dm-admin-verifications-page__hero h1,
+.dm-admin-verifications-page__gate h1 {
+  margin: 10px 0;
+  font-family: var(--font-display);
+  font-size: clamp(28px, 4vw, 46px);
+  font-weight: 600;
+}
+
+.dm-admin-verifications-page__hero p,
+.dm-admin-verifications-page__gate p {
+  max-width: 720px;
+  margin: 0;
+  color: var(--text-2);
+  line-height: 1.65;
+}
+
+.dm-admin-verifications-page__hero strong {
+  width: 78px;
+  height: 78px;
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  border: 1px solid color-mix(in oklch, var(--accent) 34%, var(--border));
+  border-radius: 18px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-family: var(--font-display);
+  font-size: 30px;
+}
+
+.dm-admin-verifications-page__gate {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: clamp(22px, 5vw, 42px);
+}
+
+.dm-admin-verifications-page__gate .dm-btn {
+  margin-top: 18px;
+}
+
+.dm-admin-verifications-page__toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 18px 0;
+}
+
+.dm-admin-verifications-page__toolbar button {
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--text-2);
+  padding: 10px 14px;
+  font-weight: 800;
+}
+
+.dm-admin-verifications-page__toolbar button.is-active {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: #1a0f02;
+}
+
+.dm-admin-verifications-page__notice,
+.dm-admin-verifications-page__error,
+.dm-admin-verifications-page__empty {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  padding: 16px;
+  color: var(--text-2);
+}
+
+.dm-admin-verifications-page__notice {
+  border-color: color-mix(in oklch, #71dfa3 42%, var(--border));
+  color: #baf7d0;
+}
+
+.dm-admin-verifications-page__error {
+  border-color: color-mix(in oklch, #ff8b8b 45%, var(--border));
+  color: #ffc0c0;
+}
+
+.dm-admin-verifications-page__empty h2 {
+  margin: 0 0 8px;
+}
+
+.dm-admin-verifications-page__empty p {
+  margin: 0;
+}
+
+.dm-admin-verifications-page__grid {
+  display: grid;
+  gap: 14px;
+}
+
+.dm-admin-verification-card {
+  display: grid;
+  gap: 14px;
+  padding: 18px;
+}
+
+.dm-admin-verification-card header {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.dm-admin-verification-card h2 {
+  margin: 8px 0 6px;
+  font-size: 20px;
+}
+
+.dm-admin-verification-card p {
+  margin: 0;
+  color: var(--text-2);
+  line-height: 1.55;
+}
+
+.dm-admin-verification-card header a,
+.dm-admin-verification-card__files a {
+  color: var(--accent);
+  font-weight: 800;
+}
+
+.dm-admin-verification-card__status,
+.dm-admin-verification-card__meta span {
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--text-2);
+  padding: 0 10px;
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.dm-admin-verification-card__status.is-pending {
+  border-color: color-mix(in oklch, var(--accent) 35%, var(--border));
+  color: var(--accent);
+}
+
+.dm-admin-verification-card__status.is-approved {
+  border-color: color-mix(in oklch, #71dfa3 45%, var(--border));
+  color: #71dfa3;
+}
+
+.dm-admin-verification-card__status.is-rejected {
+  border-color: color-mix(in oklch, #ff8b8b 45%, var(--border));
+  color: #ff8b8b;
+}
+
+.dm-admin-verification-card__meta,
+.dm-admin-verification-card__files,
+.dm-admin-verification-card footer div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.dm-admin-verification-card__person,
+.dm-admin-verification-card__comment,
+.dm-admin-verification-card__files {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface-2);
+  padding: 12px;
+}
+
+.dm-admin-verification-card__person {
+  display: grid;
+  gap: 4px;
+}
+
+.dm-admin-verification-card__person span,
+.dm-admin-verification-card__reviewed span {
+  color: var(--text-3);
+  font-size: 13px;
+}
+
+.dm-admin-verification-card__files {
+  align-items: center;
+}
+
+.dm-admin-verification-card footer {
+  display: grid;
+  gap: 10px;
+}
+
+.dm-admin-verification-card textarea {
+  width: 100%;
+  min-height: 84px;
+  resize: vertical;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text);
+  padding: 11px 12px;
+  font: inherit;
+}
+
+.dm-admin-verification-card footer button {
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface-2);
+  color: var(--text);
+  padding: 10px 14px;
+  font-weight: 900;
+}
+
+.dm-admin-verification-card footer button:hover:not(:disabled) {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.dm-admin-verification-card footer button.is-danger:hover:not(:disabled) {
+  border-color: #ff8b8b;
+  color: #ff8b8b;
+}
+
+.dm-admin-verification-card footer button:disabled {
+  cursor: wait;
+  opacity: 0.58;
+}
+
+.dm-admin-verification-card__reviewed {
+  border-top: 1px solid var(--border);
+  padding-top: 12px;
+}
+
 .dm-my-listing-card__actions {
   gap: 8px;
   margin-top: auto;
@@ -5362,6 +5623,10 @@ select {
   .dm-verification-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
+  .dm-admin-verifications-page__hero {
+    align-items: start;
+    flex-direction: column;
+  }
   .dm-subscription-hero {
     grid-template-columns: 1fr;
     align-items: start;
@@ -5499,6 +5764,25 @@ select {
   }
   .dm-verification-submit__row {
     grid-template-columns: 1fr;
+  }
+  .dm-admin-verifications-page {
+    padding: 82px 14px 32px;
+  }
+  .dm-admin-verification-card header,
+  .dm-admin-verification-card footer div {
+    align-items: stretch;
+    flex-direction: column;
+  }
+  .dm-admin-verification-card header a,
+  .dm-admin-verification-card footer button {
+    width: 100%;
+    justify-content: center;
+    text-align: center;
+  }
+  .dm-admin-verifications-page__hero strong {
+    width: 64px;
+    height: 64px;
+    font-size: 24px;
   }
   .dm-subscription-status {
     align-items: flex-start;
