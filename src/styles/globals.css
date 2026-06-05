@@ -258,6 +258,59 @@ select {
   overflow: hidden;
   text-overflow: ellipsis;
 }
+.dm-profile-menu__panel .dm-subscription-pill,
+.dm-mobile-menu__group .dm-subscription-pill {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 3px 8px;
+  width: 100%;
+  margin: 2px 0 6px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+  padding: 10px 12px;
+  color: var(--text-2);
+}
+.dm-profile-menu__panel .dm-subscription-pill:hover,
+.dm-mobile-menu__group .dm-subscription-pill:hover {
+  border-color: var(--border-2);
+  background: var(--surface-2);
+  color: var(--text);
+}
+.dm-subscription-pill span,
+.dm-subscription-pill em {
+  color: var(--text-3);
+  font-size: 10px;
+  font-style: normal;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+.dm-subscription-pill strong {
+  justify-self: end;
+  color: var(--text);
+  font-size: 12px;
+  line-height: 1.2;
+}
+.dm-subscription-pill em {
+  grid-column: 1 / -1;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-transform: none;
+  letter-spacing: 0;
+}
+.dm-subscription-pill.is-premium strong,
+.dm-subscription-pill.is-admin strong {
+  color: var(--accent);
+}
+.dm-subscription-pill.is-standard strong {
+  color: #9fc4ff;
+}
+.dm-subscription-pill.is-free strong {
+  color: var(--text-3);
+}
 
 .dm-nav__brand {
   min-width: 0;

@@ -13,6 +13,7 @@ import {
     setSubscribeType,
     setSubscribeExpired,
 } from '../features/registration/registrationSlice';
+import { useSubscription } from '../hooks/useSubscription';
 import type { RootState } from '../store/store';
 
 type IconName =
@@ -80,6 +81,7 @@ export const Nav = () => {
     const isRegistered = useSelector((state: RootState) => state.registration.isRegistered);
     const userName = useSelector((state: RootState) => state.registration.userName);
     const isAuthenticated = useSelector((state: RootState) => state.auth.isLogin);
+    const { subscribeType, subscribeExpired, isActive, isAdmin } = useSubscription();
     const isSessionAlive = isAuthenticated && sessionExpiry > Date.now();
 
     const primaryLinks = useMemo(
@@ -220,6 +222,39 @@ export const Nav = () => {
         navigate(CREATE_LISTING_PATH);
     };
 
+    const formatSubscriptionDate = (value: string | null) => {
+        if (!value) return language === 'uk' ? 'без дати завершення' : 'without expiry date';
+        const date = new Date(value);
+        if (Number.isNaN(date.getTime())) return value;
+        return new Intl.DateTimeFormat(language === 'uk' ? 'uk-UA' : 'en-US', {
+            day: '2-digit',
+            month: 'short',
+            year: 'numeric',
+        }).format(date);
+    };
+
+    const renderSubscriptionStatus = (isMobile = false) => {
+        const plan = isAdmin ? 'Admin' : subscribeType;
+        const planClass = isAdmin ? 'admin' : subscribeType.toLowerCase();
+        const details = isAdmin
+            ? language === 'uk'
+                ? 'Доступ без обмежень'
+                : 'Unlimited access'
+            : subscribeType === 'Free' || !isActive
+              ? language === 'uk'
+                  ? 'Преміум доступ не активний'
+                  : 'Premium access inactive'
+              : `${language === 'uk' ? 'Активний до' : 'Active until'} ${formatSubscriptionDate(subscribeExpired)}`;
+
+        return (
+            <Link className={`dm-subscription-pill is-${planClass} ${isMobile ? 'is-mobile' : ''}`} to="/subscription" onClick={closeMenus}>
+                <span>{language === 'uk' ? 'Тариф' : 'Plan'}</span>
+                <strong>{plan}</strong>
+                <em>{details}</em>
+            </Link>
+        );
+    };
+
     const renderPrimaryItem = (link: (typeof primaryLinks)[number]) => (
         <li key={link.to}>
             {link.to === '#map' ? (
@@ -263,6 +298,7 @@ export const Nav = () => {
             return (
                 <div className="dm-mobile-menu__group">
                     <div className="dm-mobile-menu__label">{userName || authCta.label}</div>
+                    {renderSubscriptionStatus(true)}
                     {accountLinks.map((link) => (
                         <NavLink key={link.to} to={link.to} onClick={closeMenus}>
                             <NavIcon name={link.icon} />
@@ -293,6 +329,7 @@ export const Nav = () => {
                 {isProfileOpen && (
                     <div className="dm-profile-menu__panel" role="menu">
                         <div className="dm-profile-menu__user">{userName || authCta.label}</div>
+                        {renderSubscriptionStatus()}
                         {accountLinks.map((link) => (
                             <Link key={link.to} to={link.to} onClick={closeMenus}>
                                 <NavIcon name={link.icon} />
