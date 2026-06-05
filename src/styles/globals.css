@@ -2266,6 +2266,102 @@ select {
   font-size: 12px;
 }
 
+.dm-my-listing-verification {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 2px;
+}
+
+.dm-my-listing-verification__badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--text-3);
+  padding: 0 10px;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.dm-my-listing-verification__badge.is-pending {
+  border-color: color-mix(in oklch, var(--accent) 35%, var(--border));
+  color: var(--accent);
+}
+
+.dm-my-listing-verification__badge.is-documentsVerified,
+.dm-my-listing-verification__badge.is-representativeVerified {
+  border-color: color-mix(in oklch, #71dfa3 45%, var(--border));
+  color: #71dfa3;
+}
+
+.dm-my-listing-verification__badge.is-rejected {
+  border-color: color-mix(in oklch, #ff8b8b 45%, var(--border));
+  color: #ff8b8b;
+}
+
+.dm-verification-request-form {
+  display: grid;
+  gap: 10px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+  padding: 12px;
+}
+
+.dm-verification-request-form__row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.dm-verification-request-form label {
+  display: grid;
+  gap: 6px;
+}
+
+.dm-verification-request-form label > span {
+  color: var(--text-3);
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.dm-verification-request-form select,
+.dm-verification-request-form textarea,
+.dm-verification-request-form input[type='file'] {
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text);
+  padding: 10px 11px;
+  font: inherit;
+}
+
+.dm-verification-request-form select option {
+  background: #0e1a2e;
+  color: var(--text);
+}
+
+.dm-verification-request-form textarea {
+  min-height: 78px;
+  resize: vertical;
+}
+
+.dm-verification-request-form p {
+  margin: 0;
+  color: var(--text-3);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
 .dm-my-listing-card__actions {
   gap: 8px;
   margin-top: auto;
@@ -5317,6 +5413,13 @@ select {
   }
   .dm-my-listing-card__actions {
     align-items: stretch;
+  }
+  .dm-my-listing-verification {
+    align-items: stretch;
+    flex-direction: column;
+  }
+  .dm-verification-request-form__row {
+    grid-template-columns: 1fr;
   }
   .dm-form-message.is-success {
     flex-direction: column;

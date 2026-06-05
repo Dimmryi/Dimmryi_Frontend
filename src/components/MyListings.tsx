@@ -4,14 +4,37 @@ import { useAppSelector, useIsAdmin } from '../app/hooks';
 import type { Listing } from './ListingCard';
 import { Icons } from './Icons';
 import { PlaceholderImage } from './PlaceholderImage';
+import {
+    createVerificationRequest,
+    uploadVerificationFile,
+    type VerificationDocumentType,
+    type VerificationRequestType,
+} from '../services/VerificationService';
 
 interface MyListing extends Listing {
     owner?: string;
     ownerId?: string;
+    verificationStatus?: VerificationStatus;
 }
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 const CLOUD_NAME = import.meta.env.VITE_CLOUD_NAME || '';
+
+type VerificationStatus = 'notVerified' | 'pending' | 'documentsVerified' | 'representativeVerified' | 'rejected';
+
+interface VerificationFormState {
+    requestType: VerificationRequestType;
+    documentType: VerificationDocumentType;
+    comment: string;
+    files: File[];
+}
+
+const initialVerificationForm: VerificationFormState = {
+    requestType: 'owner',
+    documentType: 'technicalPassport',
+    comment: '',
+    files: [],
+};
 
 const typeLabel = (value?: string) => {
     const map: Record<string, string> = {
@@ -42,6 +65,31 @@ const formatPrice = (value: number | string) => {
     const numeric = Number(String(value).replace(/[^\d.]/g, ''));
     return Number.isFinite(numeric) ? numeric.toLocaleString('uk-UA') : String(value);
 };
+
+const verificationStatusLabel = (value?: VerificationStatus) => {
+    const labels: Record<VerificationStatus, string> = {
+        notVerified: 'Не перевірено',
+        pending: 'Очікує перевірки',
+        documentsVerified: 'Документи перевірені',
+        representativeVerified: 'Представник перевірений',
+        rejected: 'Відхилено',
+    };
+
+    return labels[value || 'notVerified'];
+};
+
+const verificationStatusClass = (value?: VerificationStatus) => `is-${value || 'notVerified'}`;
+
+const requestTypeOptions: Array<{ value: VerificationRequestType; label: string }> = [
+    { value: 'owner', label: 'Я власник' },
+    { value: 'representative', label: 'Я представник' },
+];
+
+const documentTypeOptions: Array<{ value: VerificationDocumentType; label: string }> = [
+    { value: 'technicalPassport', label: 'Технічний паспорт' },
+    { value: 'ownershipExtract', label: 'Витяг / право власності' },
+    { value: 'representativeDocument', label: 'Документ представника' },
+];
 
 const getCloudinaryPublicId = (url: string) => {
     const marker = '/upload/';
@@ -91,6 +139,9 @@ const MyListings = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState('');
     const [message, setMessage] = useState('');
+    const [activeVerificationListingId, setActiveVerificationListingId] = useState('');
+    const [verificationForm, setVerificationForm] = useState<VerificationFormState>(initialVerificationForm);
+    const [verificationSubmittingId, setVerificationSubmittingId] = useState('');
 
     const heading = isAdmin ? 'Усі оголошення' : userName ? `${userName}, ваші оголошення` : 'Мої оголошення';
 
@@ -172,6 +223,48 @@ const MyListings = () => {
         }
     };
 
+    const openVerificationForm = (listingId: string) => {
+        setError('');
+        setMessage('');
+        setVerificationForm(initialVerificationForm);
+        setActiveVerificationListingId((current) => (current === listingId ? '' : listingId));
+    };
+
+    const handleVerificationSubmit = async (listing: MyListing) => {
+        if (!listing._id) return;
+        if (!verificationForm.files.length) {
+            setError('Додайте хоча б один документ для перевірки.');
+            return;
+        }
+
+        setError('');
+        setMessage('');
+        setVerificationSubmittingId(listing._id);
+
+        try {
+            const uploadedFiles = await Promise.all(verificationForm.files.map(uploadVerificationFile));
+            await createVerificationRequest(listing._id, {
+                requestType: verificationForm.requestType,
+                documentType: verificationForm.documentType,
+                files: uploadedFiles,
+                comment: verificationForm.comment,
+            });
+
+            setListings((current) =>
+                current.map((item) =>
+                    item._id === listing._id ? { ...item, verificationStatus: 'pending' } : item,
+                ),
+            );
+            setActiveVerificationListingId('');
+            setVerificationForm(initialVerificationForm);
+            setMessage('Заявку на перевірку надіслано. Документи не будуть показані публічно.');
+        } catch (caughtError) {
+            setError(caughtError instanceof Error ? caughtError.message : 'Не вдалося надіслати заявку на перевірку.');
+        } finally {
+            setVerificationSubmittingId('');
+        }
+    };
+
     return (
         <main className="dm-my-listings-page">
             <section className="dm-section dm-my-listings-head">
@@ -213,6 +306,14 @@ const MyListings = () => {
                             const hasVideo = Boolean(listing.video?.some(Boolean) || listing.videoUrl);
                             const title = listing.apartmentDetails || listing.description || typeLabel(listing.propertyType);
                             const displayNumber = listing.listingNumber ?? index + 1;
+                            const verificationStatus = listing.verificationStatus || 'notVerified';
+                            const canRequestVerification =
+                                listing.ownerId === userId &&
+                                verificationStatus !== 'pending' &&
+                                verificationStatus !== 'documentsVerified' &&
+                                verificationStatus !== 'representativeVerified';
+                            const isVerificationFormOpen = activeVerificationListingId === listing._id;
+                            const isVerificationSubmitting = verificationSubmittingId === listing._id;
 
                             return (
                                 <li className="dm-my-listing-card" key={listing._id}>
@@ -243,6 +344,90 @@ const MyListings = () => {
                                             {Icons.pin()} <span>{listing.location}</span>
                                         </p>
                                         {isAdmin && listing.owner ? <p className="dm-my-listing-card__owner">Власник: {listing.owner}</p> : null}
+                                        <div className="dm-my-listing-verification">
+                                            <span className={`dm-my-listing-verification__badge ${verificationStatusClass(verificationStatus)}`}>
+                                                {verificationStatusLabel(verificationStatus)}
+                                            </span>
+                                            {canRequestVerification ? (
+                                                <button className="dm-btn dm-btn--ghost dm-btn--sm" type="button" onClick={() => openVerificationForm(listing._id)}>
+                                                    {isVerificationFormOpen ? 'Закрити перевірку' : 'Подати на перевірку'}
+                                                </button>
+                                            ) : null}
+                                        </div>
+                                        {isVerificationFormOpen ? (
+                                            <div className="dm-verification-request-form">
+                                                <div className="dm-verification-request-form__row">
+                                                    <label>
+                                                        <span>Тип перевірки</span>
+                                                        <select
+                                                            value={verificationForm.requestType}
+                                                            onChange={(event) =>
+                                                                setVerificationForm((current) => ({
+                                                                    ...current,
+                                                                    requestType: event.target.value as VerificationRequestType,
+                                                                }))
+                                                            }
+                                                        >
+                                                            {requestTypeOptions.map((option) => (
+                                                                <option key={option.value} value={option.value}>{option.label}</option>
+                                                            ))}
+                                                        </select>
+                                                    </label>
+                                                    <label>
+                                                        <span>Документ</span>
+                                                        <select
+                                                            value={verificationForm.documentType}
+                                                            onChange={(event) =>
+                                                                setVerificationForm((current) => ({
+                                                                    ...current,
+                                                                    documentType: event.target.value as VerificationDocumentType,
+                                                                }))
+                                                            }
+                                                        >
+                                                            {documentTypeOptions.map((option) => (
+                                                                <option key={option.value} value={option.value}>{option.label}</option>
+                                                            ))}
+                                                        </select>
+                                                    </label>
+                                                </div>
+                                                <label>
+                                                    <span>Файл документа</span>
+                                                    <input
+                                                        type="file"
+                                                        accept="image/*,.pdf"
+                                                        multiple
+                                                        onChange={(event) =>
+                                                            setVerificationForm((current) => ({
+                                                                ...current,
+                                                                files: Array.from(event.target.files || []),
+                                                            }))
+                                                        }
+                                                    />
+                                                </label>
+                                                <label>
+                                                    <span>Коментар для модератора</span>
+                                                    <textarea
+                                                        value={verificationForm.comment}
+                                                        onChange={(event) =>
+                                                            setVerificationForm((current) => ({
+                                                                ...current,
+                                                                comment: event.target.value,
+                                                            }))
+                                                        }
+                                                        placeholder="Наприклад: документ підтверджує адресу та площу об’єкта."
+                                                    />
+                                                </label>
+                                                <p>Документи зберігаються окремо від фото оголошення і не відображаються публічно.</p>
+                                                <button
+                                                    className="dm-btn dm-btn--accent dm-btn--sm"
+                                                    type="button"
+                                                    disabled={isVerificationSubmitting}
+                                                    onClick={() => handleVerificationSubmit(listing)}
+                                                >
+                                                    {isVerificationSubmitting ? 'Надсилаємо...' : 'Надіслати заявку'}
+                                                </button>
+                                            </div>
+                                        ) : null}
                                         <div className="dm-my-listing-card__actions">
                                             <Link className="dm-btn dm-btn--ghost dm-btn--sm" to={`/details/${listing._id}`}>Переглянути</Link>
                                             <Link className="dm-btn dm-btn--ghost dm-btn--sm" to={`/listings/edit/${listing._id}`}>Редагувати</Link>
