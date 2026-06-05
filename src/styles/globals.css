@@ -1033,6 +1033,126 @@ select {
 }
 
 /* ============================================================
+   VERIFICATION
+   ============================================================ */
+.dm-verification-page {
+  min-height: calc(100vh - 81px);
+}
+.dm-verification-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(300px, 0.8fr);
+  gap: 40px;
+  align-items: end;
+  margin-bottom: 24px;
+}
+.dm-verification-hero p {
+  margin: 0;
+  color: var(--text-2);
+  font-size: 15px;
+  line-height: 1.65;
+}
+.dm-verification-note,
+.dm-verification-next {
+  border: 1px solid color-mix(in oklch, var(--accent) 28%, var(--border));
+  border-radius: var(--radius-sm);
+  background:
+    linear-gradient(135deg, color-mix(in oklch, var(--accent) 10%, transparent), transparent 52%),
+    var(--surface);
+  padding: 18px 20px;
+}
+.dm-verification-note {
+  margin-bottom: 18px;
+}
+.dm-verification-note strong,
+.dm-verification-next span {
+  color: var(--accent);
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.dm-verification-note p,
+.dm-verification-next p {
+  margin: 6px 0 0;
+  color: var(--text-2);
+  font-size: 14px;
+  line-height: 1.6;
+}
+.dm-verification-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+}
+.dm-verification-card,
+.dm-verification-panel,
+.dm-verification-list article,
+.dm-verification-statuses article {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+}
+.dm-verification-card {
+  min-height: 210px;
+  padding: 18px;
+}
+.dm-verification-card span {
+  color: var(--accent);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 900;
+}
+.dm-verification-card h2,
+.dm-verification-list h3,
+.dm-verification-next h2 {
+  margin: 12px 0 8px;
+  font-size: 18px;
+}
+.dm-verification-card p,
+.dm-verification-list p,
+.dm-verification-statuses p {
+  margin: 0;
+  color: var(--text-2);
+  font-size: 13.5px;
+  line-height: 1.6;
+}
+.dm-verification-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 16px;
+  margin-top: 18px;
+}
+.dm-verification-panel {
+  padding: 18px;
+}
+.dm-verification-list,
+.dm-verification-statuses {
+  display: grid;
+  gap: 10px;
+}
+.dm-verification-list article,
+.dm-verification-statuses article {
+  padding: 14px;
+}
+.dm-verification-list h3 {
+  margin-top: 0;
+  font-size: 16px;
+}
+.dm-verification-statuses strong {
+  color: var(--text);
+  font-size: 14px;
+}
+.dm-verification-next {
+  display: flex;
+  justify-content: space-between;
+  gap: 18px;
+  align-items: center;
+  margin-top: 18px;
+}
+.dm-verification-next h2 {
+  margin-top: 6px;
+}
+
+/* ============================================================
    SUBSCRIPTION
    ============================================================ */
 .dm-subscription-page {
@@ -5001,6 +5121,13 @@ select {
     grid-template-columns: 1fr;
     align-items: start;
   }
+  .dm-verification-hero,
+  .dm-verification-layout {
+    grid-template-columns: 1fr;
+  }
+  .dm-verification-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
   .dm-subscription-hero {
     grid-template-columns: 1fr;
     align-items: start;
@@ -5125,6 +5252,16 @@ select {
   }
   .dm-services-grid {
     grid-template-columns: 1fr;
+  }
+  .dm-verification-grid {
+    grid-template-columns: 1fr;
+  }
+  .dm-verification-next {
+    align-items: stretch;
+    flex-direction: column;
+  }
+  .dm-verification-next .dm-btn {
+    width: 100%;
   }
   .dm-subscription-status {
     align-items: flex-start;

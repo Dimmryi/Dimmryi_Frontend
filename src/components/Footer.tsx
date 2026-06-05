@@ -52,7 +52,7 @@ export const Footer = () => {
                     links={[
                         { label: translate('footer.links.list'), to: '/listings/new' },
                         { label: translate('footer.links.tariffs'), to: '/subscription' },
-                        { label: translate('footer.links.verification'), to: '/services' },
+                        { label: translate('footer.links.verification'), to: '/verification' },
                         { label: translate('footer.links.priceAnalytics'), to: '/services' },
                         { label: translate('footer.links.dealSecurity'), to: '/services' },
                     ]}
