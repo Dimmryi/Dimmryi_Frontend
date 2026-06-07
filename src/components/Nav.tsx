@@ -97,6 +97,7 @@ export const Nav = () => {
         { label: 'Усі сервіси', to: '/services', icon: 'services' as const },
         { label: 'Рієлтори', to: '/agents', icon: 'user' as const },
         { label: 'AI-оцінка', to: '/real-estate-estimator', icon: 'search' as const },
+        { label: 'Аналітика цін', to: '/price-analytics', icon: 'map' as const },
         { label: 'Сповіщення', to: '/notification', icon: 'bell' as const },
         { label: 'Договір', to: '/agreement', icon: 'message' as const },
     ];
@@ -106,6 +107,7 @@ export const Nav = () => {
         { label: 'Мій профіль рієлтора', to: '/my-agent', icon: 'user' as const },
         { label: 'Мої оголошення', to: '/my-listings', icon: 'home' as const },
         ...(isAdmin ? [{ label: 'Перевірки', to: '/admin/verifications', icon: 'services' as const }] : []),
+        ...(isAdmin ? [{ label: 'Ціни', to: '/admin/price-analytics', icon: 'map' as const }] : []),
         { label: 'Мої коментарі', to: '/my-comments', icon: 'message' as const },
         { label: 'Мої сповіщення', to: '/my-notifications', icon: 'bell' as const },
     ];
