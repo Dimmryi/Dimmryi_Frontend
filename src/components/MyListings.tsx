@@ -12,10 +12,12 @@ import {
     type VerificationDocumentType,
     type VerificationRequestType,
 } from '../services/VerificationService';
+import { useCurrency } from '../CurrencyProvider';
 
 interface MyListing extends Listing {
     owner?: string;
     ownerId?: string;
+    currency?: string;
     verificationStatus?: VerificationStatus;
 }
 
@@ -61,11 +63,6 @@ const formatDate = (value?: number | string) => {
         month: 'short',
         year: 'numeric',
     });
-};
-
-const formatPrice = (value: number | string) => {
-    const numeric = Number(String(value).replace(/[^\d.]/g, ''));
-    return Number.isFinite(numeric) ? numeric.toLocaleString('uk-UA') : String(value);
 };
 
 const verificationStatusLabel = (value?: VerificationStatus) => {
@@ -136,6 +133,7 @@ const MyListings = () => {
     const userId = useAppSelector((state) => state.registration.userId);
     const userName = useAppSelector((state) => state.registration.userName);
     const isAdmin = useIsAdmin();
+    const { formatPrice } = useCurrency();
 
     const [listings, setListings] = useState<MyListing[]>([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -339,7 +337,7 @@ const MyListings = () => {
                                         </div>
                                         <h2>{title}</h2>
                                         <div className="dm-my-listing-card__price">
-                                            ₴{formatPrice(listing.price)}
+                                            {formatPrice(listing.price, listing.currency)}
                                             {isRent ? <span>/ міс</span> : null}
                                         </div>
                                         <div className="dm-my-listing-card__chips">

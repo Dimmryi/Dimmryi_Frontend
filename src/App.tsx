@@ -4,6 +4,7 @@ import { GoogleOAuthProvider } from '@react-oauth/google';
 import { Nav } from './components/Nav';
 import { FavoritesBootstrap } from './components/FavoritesBootstrap';
 import { useLanguage } from './LanguageProvider';
+import { CurrencyProvider } from './CurrencyProvider';
 import './styles/globals.css';
 
 const Home = lazy(() => import('./pages/Home').then((module) => ({ default: module.Home })));
@@ -43,42 +44,44 @@ function App() {
     return (
         <GoogleOAuthProvider clientId={googleClientId}>
             <BrowserRouter>
-                <div className="dm-root" data-screen-label={translate('app.screenLabel')}>
-                    <Nav />
-                    <FavoritesBootstrap />
-                    <Suspense fallback={<RouteFallback />}>
-                        <Routes>
-                            <Route path="/" element={<Home />} />
-                            <Route path="registration" element={<Registration />} />
-                            <Route path="login" element={<Login />} />
-                            <Route path="listings" element={<Listings />} />
-                            <Route path="details/:listingId" element={<Details />} />
-                            <Route path="chat/:listingId" element={<ChatPage />} />
-                            <Route path="favorites" element={<Favorites />} />
-                            <Route path="my-agent" element={<MyAgentProfile />} />
-                            <Route path="listings/new" element={<ListingForm />} />
-                            <Route path="listings/edit/:listingId" element={<ListingForm />} />
-                            <Route path="services" element={<Services />} />
-                            <Route path="verification" element={<Verification />} />
-                            <Route path="admin/verifications" element={<AdminVerifications />} />
-                            <Route path="price-analytics" element={<PriceAnalytics />} />
-                            <Route path="admin/price-analytics" element={<AdminPriceAnalytics />} />
-                            <Route path="agreement" element={<Agreement />} />
-                            <Route path="real-estate-estimator" element={<RealEstateEstimator />} />
-                            <Route path="advertising" element={<AccountPlaceholder title="Рекламне відео" />} />
-                            <Route path="notification" element={<Notification />} />
-                            <Route path="notification/edit/:notificationId" element={<Notification />} />
-                            <Route path="agents" element={<Agents />} />
-                            <Route path="about" element={<AccountPlaceholder title="Про нас" />} />
-                            <Route path="promotion-your-listing" element={<AccountPlaceholder title="Просування оголошення" />} />
-                            <Route path="subscription" element={<Subscription />} />
-                            <Route path="my-listings" element={<MyListings />} />
-                            <Route path="my-comments" element={<MyComments />} />
-                            <Route path="my-notifications" element={<MyNotification />} />
-                            <Route path="myNotification" element={<MyNotification />} />
-                        </Routes>
-                    </Suspense>
-                </div>
+                <CurrencyProvider>
+                    <div className="dm-root" data-screen-label={translate('app.screenLabel')}>
+                        <Nav />
+                        <FavoritesBootstrap />
+                        <Suspense fallback={<RouteFallback />}>
+                            <Routes>
+                                <Route path="/" element={<Home />} />
+                                <Route path="registration" element={<Registration />} />
+                                <Route path="login" element={<Login />} />
+                                <Route path="listings" element={<Listings />} />
+                                <Route path="details/:listingId" element={<Details />} />
+                                <Route path="chat/:listingId" element={<ChatPage />} />
+                                <Route path="favorites" element={<Favorites />} />
+                                <Route path="my-agent" element={<MyAgentProfile />} />
+                                <Route path="listings/new" element={<ListingForm />} />
+                                <Route path="listings/edit/:listingId" element={<ListingForm />} />
+                                <Route path="services" element={<Services />} />
+                                <Route path="verification" element={<Verification />} />
+                                <Route path="admin/verifications" element={<AdminVerifications />} />
+                                <Route path="price-analytics" element={<PriceAnalytics />} />
+                                <Route path="admin/price-analytics" element={<AdminPriceAnalytics />} />
+                                <Route path="agreement" element={<Agreement />} />
+                                <Route path="real-estate-estimator" element={<RealEstateEstimator />} />
+                                <Route path="advertising" element={<AccountPlaceholder title="Рекламне відео" />} />
+                                <Route path="notification" element={<Notification />} />
+                                <Route path="notification/edit/:notificationId" element={<Notification />} />
+                                <Route path="agents" element={<Agents />} />
+                                <Route path="about" element={<AccountPlaceholder title="Про нас" />} />
+                                <Route path="promotion-your-listing" element={<AccountPlaceholder title="Просування оголошення" />} />
+                                <Route path="subscription" element={<Subscription />} />
+                                <Route path="my-listings" element={<MyListings />} />
+                                <Route path="my-comments" element={<MyComments />} />
+                                <Route path="my-notifications" element={<MyNotification />} />
+                                <Route path="myNotification" element={<MyNotification />} />
+                            </Routes>
+                        </Suspense>
+                    </div>
+                </CurrencyProvider>
             </BrowserRouter>
         </GoogleOAuthProvider>
     );

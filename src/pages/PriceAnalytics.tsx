@@ -7,6 +7,7 @@ import {
     type AnalyticsPropertyType,
     type PriceAnalyticsSnapshot,
 } from '../services/PriceAnalyticsService';
+import { useCurrency } from '../CurrencyProvider';
 
 const listingTypeOptions: Array<{ value: AnalyticsListingType; label: string }> = [
     { value: 'sale', label: 'Продаж' },
@@ -31,11 +32,6 @@ const confidenceLabels = {
     low: 'Низька довіра',
 };
 
-const formatMoney = (value: number, currency = 'USD') =>
-    Number(value || 0).toLocaleString('uk-UA', {
-        maximumFractionDigits: 0,
-    }) + ` ${currency}`;
-
 const formatMonth = (value: string) => {
     const [year, month] = value.split('-').map(Number);
     if (!year || !month) return value;
@@ -43,7 +39,13 @@ const formatMonth = (value: string) => {
 };
 
 const PriceChart = ({ snapshots }: { snapshots: PriceAnalyticsSnapshot[] }) => {
-    const points = snapshots.filter((snapshot) => snapshot.pricePerSquareMeter > 0);
+    const { displayCurrency, convertPrice, formatPrice } = useCurrency();
+    const points = snapshots
+        .filter((snapshot) => snapshot.pricePerSquareMeter > 0)
+        .map((snapshot) => ({
+            snapshot,
+            pricePerSquareMeter: convertPrice(snapshot.pricePerSquareMeter, snapshot.currency),
+        }));
     if (points.length < 2) {
         return (
             <div className="dm-price-chart is-empty">
@@ -57,14 +59,20 @@ const PriceChart = ({ snapshots }: { snapshots: PriceAnalyticsSnapshot[] }) => {
     const max = Math.max(...values);
     const range = Math.max(max - min, 1);
     const width = 760;
-    const height = 280;
-    const padding = 36;
-    const chartWidth = width - padding * 2;
-    const chartHeight = height - padding * 2;
+    const height = 300;
+    const padding = {
+        top: 36,
+        right: 28,
+        bottom: 58,
+        left: 86,
+    };
+    const chartWidth = width - padding.left - padding.right;
+    const chartHeight = height - padding.top - padding.bottom;
+    const chartBottom = height - padding.bottom;
 
     const coords = points.map((point, index) => {
-        const x = padding + (index / Math.max(points.length - 1, 1)) * chartWidth;
-        const y = padding + chartHeight - ((point.pricePerSquareMeter - min) / range) * chartHeight;
+        const x = padding.left + (index / Math.max(points.length - 1, 1)) * chartWidth;
+        const y = padding.top + chartHeight - ((point.pricePerSquareMeter - min) / range) * chartHeight;
         return { x, y, point };
     });
     const line = coords.map((coord) => `${coord.x},${coord.y}`).join(' ');
@@ -72,22 +80,22 @@ const PriceChart = ({ snapshots }: { snapshots: PriceAnalyticsSnapshot[] }) => {
     return (
         <div className="dm-price-chart">
             <svg viewBox={`0 0 ${width} ${height}`} role="img" aria-label="Графік цін за останні 12 місяців">
-                <line x1={padding} y1={padding} x2={padding} y2={height - padding} />
-                <line x1={padding} y1={height - padding} x2={width - padding} y2={height - padding} />
-                <text x={padding} y={padding - 12}>{formatMoney(max, points[0].currency)}</text>
-                <text x={padding} y={height - 8}>{formatMoney(min, points[0].currency)}</text>
+                <line x1={padding.left} y1={padding.top} x2={padding.left} y2={chartBottom} />
+                <line x1={padding.left} y1={chartBottom} x2={width - padding.right} y2={chartBottom} />
+                <text x={padding.left - 10} y={padding.top + 4} textAnchor="end">{formatPrice(max, displayCurrency)}</text>
+                <text x={padding.left - 10} y={chartBottom + 4} textAnchor="end">{formatPrice(min, displayCurrency)}</text>
                 <polyline points={line} />
                 {coords.map((coord) => (
-                    <g key={coord.point._id}>
+                    <g key={coord.point.snapshot._id}>
                         <circle cx={coord.x} cy={coord.y} r="5" />
                         <title>
-                            {formatMonth(coord.point.periodMonth)}: {formatMoney(coord.point.pricePerSquareMeter, coord.point.currency)} / м²
+                            {formatMonth(coord.point.snapshot.periodMonth)}: {formatPrice(coord.point.snapshot.pricePerSquareMeter, coord.point.snapshot.currency)} / м²
                         </title>
                     </g>
                 ))}
                 {coords.map((coord, index) => (
-                    <text key={`${coord.point._id}-label`} x={coord.x} y={height - 10} textAnchor={index === 0 ? 'start' : index === coords.length - 1 ? 'end' : 'middle'}>
-                        {formatMonth(coord.point.periodMonth)}
+                    <text key={`${coord.point.snapshot._id}-label`} x={coord.x} y={chartBottom + 34} textAnchor={index === 0 ? 'start' : index === coords.length - 1 ? 'end' : 'middle'}>
+                        {formatMonth(coord.point.snapshot.periodMonth)}
                     </text>
                 ))}
             </svg>
@@ -107,6 +115,7 @@ const PriceAnalytics = () => {
     const [snapshots, setSnapshots] = useState<PriceAnalyticsSnapshot[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
+    const { convertPrice, formatPrice } = useCurrency();
 
     useEffect(() => {
         let isMounted = true;
@@ -133,8 +142,10 @@ const PriceAnalytics = () => {
     const previous = snapshots[snapshots.length - 2];
     const change = useMemo(() => {
         if (!latest || !previous || !previous.pricePerSquareMeter) return null;
-        return ((latest.pricePerSquareMeter - previous.pricePerSquareMeter) / previous.pricePerSquareMeter) * 100;
-    }, [latest, previous]);
+        const latestValue = convertPrice(latest.pricePerSquareMeter, latest.currency);
+        const previousValue = convertPrice(previous.pricePerSquareMeter, previous.currency);
+        return ((latestValue - previousValue) / previousValue) * 100;
+    }, [convertPrice, latest, previous]);
 
     const handleSubmit = (event: FormEvent) => {
         event.preventDefault();
@@ -200,12 +211,12 @@ const PriceAnalytics = () => {
                     <section className="dm-price-analytics-cards">
                         <article>
                             <span>Ціна за м²</span>
-                            <strong>{formatMoney(latest.pricePerSquareMeter, latest.currency)}</strong>
+                            <strong>{formatPrice(latest.pricePerSquareMeter, latest.currency)}</strong>
                             <p>{change === null ? 'Недостатньо даних для зміни' : `${change >= 0 ? '+' : ''}${change.toFixed(1)}% до попереднього місяця`}</p>
                         </article>
                         <article>
                             <span>Медіанна ціна</span>
-                            <strong>{formatMoney(latest.medianPrice, latest.currency)}</strong>
+                            <strong>{formatPrice(latest.medianPrice, latest.currency)}</strong>
                             <p>{latest.sampleSize ? `${latest.sampleSize} спостережень` : 'Обсяг вибірки не вказано'}</p>
                         </article>
                         <article>

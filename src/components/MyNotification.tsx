@@ -181,10 +181,10 @@ const MyNotification = () => {
                                                 <dd>{rangeLabel(notification.minFloor, notification.maxFloor)}</dd>
                                             </div>
                                         )}
-                                        {rangeLabel(notification.minPrice, notification.maxPrice, '$') && (
+                                        {rangeLabel(notification.minPrice, notification.maxPrice, '₴') && (
                                             <div>
                                                 <dt>Ціна</dt>
-                                                <dd>{rangeLabel(notification.minPrice, notification.maxPrice, '$')}</dd>
+                                                <dd>{rangeLabel(notification.minPrice, notification.maxPrice, '₴')}</dd>
                                             </div>
                                         )}
                                     </dl>

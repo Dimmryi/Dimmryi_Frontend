@@ -10,6 +10,7 @@ import { fetchListings } from '../services/ListingService';
 import { useAppDispatch, useAppSelector } from '../app/hooks';
 import { resetMapFilter, setFilterFeatures } from '../features/filterMap/filterMapSlice';
 import { useFavorites } from '../hooks/useFavorites';
+import { useCurrency } from '../CurrencyProvider';
 
 const LeafletListingsMap = lazy(() => import('./LeafletListingsMap'));
 
@@ -41,11 +42,6 @@ const getListingTitle = (listing?: Listing) =>
 
 const getListingCover = (listing?: Listing) => listing?.image?.find((item): item is string => Boolean(item)) || '';
 
-const parseListingPrice = (price: number | string) => {
-    const parsed = Number(String(price).replace(/[^\d.]/g, ''));
-    return Number.isFinite(parsed) ? parsed : 0;
-};
-
 const getTodayStart = () => {
     const todayStart = new Date();
     todayStart.setHours(0, 0, 0, 0);
@@ -62,6 +58,7 @@ export const MapSection = ({ accent }: MapSectionProps) => {
     const dispatch = useAppDispatch();
     const mapFilter = useAppSelector((state) => state.filterMap);
     const { favoriteIds, toggleFavorite } = useFavorites();
+    const { displayCurrency, convertPrice, formatPrice } = useCurrency();
 
     const [filtersOpen, setFiltersOpen] = useState(false);
     const [infoOpen, setInfoOpen] = useState(false);
@@ -83,8 +80,8 @@ export const MapSection = ({ accent }: MapSectionProps) => {
     const fallbackListings = useMemo(() => PROPERTIES.map(mockListingFromProperty), []);
     const listingsForMap = mapListings.length > 0 ? mapListings : fallbackListings;
     const absoluteMaxPrice = useMemo(
-        () => Math.max(...listingsForMap.map((listing) => parseListingPrice(listing.price)), 0),
-        [listingsForMap],
+        () => Math.max(...listingsForMap.map((listing) => convertPrice(listing.price, listing.currency)), 0),
+        [convertPrice, listingsForMap],
     );
 
     const filtered = useMemo(() => {
@@ -95,7 +92,7 @@ export const MapSection = ({ accent }: MapSectionProps) => {
         return listingsForMap.filter((listing) => {
             const rooms = Number(listing.numbersOfRooms || 0);
             const area = Number(listing.totalArea || 0);
-            const price = parseListingPrice(listing.price);
+            const price = convertPrice(listing.price, listing.currency);
 
             const matchesMode = filterMode === 'all' || listing.listingType === filterMode;
             const matchesRooms = selectedRoom === 0 || (selectedRoom === '5+' ? rooms >= 5 : rooms === selectedRoom);
@@ -109,7 +106,7 @@ export const MapSection = ({ accent }: MapSectionProps) => {
 
             return matchesMode && matchesRooms && matchesArea && matchesPrice && matchesPropertyType && matchesNovelty && matchesToday;
         });
-    }, [areaMax, areaMin, beds, filterMode, listingsForMap, mapFilter.propertyType, newBuildOnly, priceMax, priceMin, todayOnly]);
+    }, [areaMax, areaMin, beds, convertPrice, filterMode, listingsForMap, mapFilter.propertyType, newBuildOnly, priceMax, priceMin, todayOnly]);
 
     const activeListing = useMemo(
         () => (active ? filtered.find((listing) => listing._id === active) : undefined),
@@ -161,6 +158,7 @@ export const MapSection = ({ accent }: MapSectionProps) => {
     };
 
     const roomLabels = MAP_ROOM_OPTIONS.map((value) => (value === 0 ? translate('mapSection.filters.zero') : String(value)));
+    const currencySymbol = displayCurrency === 'UAH' ? '₴' : '$';
 
     const handleFilterModeChange = (nextMode: FilterMode) => {
         setFilterMode(nextMode);
@@ -369,7 +367,7 @@ export const MapSection = ({ accent }: MapSectionProps) => {
                                             value={priceMin}
                                             onChange={(event) => setPriceMin(Math.min(Number(event.target.value || 0), priceMax))}
                                         />
-                                        <em>₴</em>
+                                        <em>{currencySymbol}</em>
                                     </div>
                                     <div className="dm-mininput">
                                         <span>{translate('mapSection.filters.to')}</span>
@@ -382,7 +380,7 @@ export const MapSection = ({ accent }: MapSectionProps) => {
                                                 setPriceMax(Math.max(priceMin, Math.min(Number(event.target.value || 0), absoluteMaxPrice)))
                                             }
                                         />
-                                        <em>₴</em>
+                                        <em>{currencySymbol}</em>
                                     </div>
                                 </div>
                                 <div className="dm-range dm-range--dual">
@@ -416,11 +414,11 @@ export const MapSection = ({ accent }: MapSectionProps) => {
                                         className="dm-range__native dm-range__native--max"
                                     />
                                     <div className="dm-range__labels">
-                                        <span>₴0</span>
+                                        <span>{formatPrice(0, displayCurrency)}</span>
                                         <span className="dm-range__val">
-                                            {translate('mapSection.filters.from')} ₴{priceMin.toLocaleString()} - ₴{priceMax.toLocaleString()}
+                                            {translate('mapSection.filters.from')} {formatPrice(priceMin, displayCurrency)} - {formatPrice(priceMax, displayCurrency)}
                                         </span>
-                                        <span>₴{absoluteMaxPrice.toLocaleString()}</span>
+                                        <span>{formatPrice(absoluteMaxPrice, displayCurrency)}</span>
                                     </div>
                                 </div>
                             </FilterGroup>
@@ -567,7 +565,7 @@ export const MapSection = ({ accent }: MapSectionProps) => {
                                 </div>
                                 <div className="dm-prop-card__body">
                                     <div className="dm-prop-card__price">
-                                        ₴{activeListing.price}
+                                        {formatPrice(activeListing.price, activeListing.currency)}
                                         {activeListing.listingType === 'rent' && <em>{translate('mapSection.properties.perMonth')}</em>}
                                     </div>
                                     <div className="dm-prop-card__title">{getListingTitle(activeListing)}</div>
@@ -636,7 +634,7 @@ export const MapSection = ({ accent }: MapSectionProps) => {
                             setInfoOpen(true);
                         }}
                     >
-                        <span className="dm-map-strip__price">₴{listing.price}</span>
+                        <span className="dm-map-strip__price">{formatPrice(listing.price, listing.currency)}</span>
                         <span className="dm-map-strip__title">{getListingTitle(listing)}</span>
                         <span className="dm-map-strip__sub">
                             {listing.numbersOfRooms

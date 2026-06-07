@@ -163,6 +163,28 @@ select {
   margin: 0 4px;
 }
 
+.dm-currency {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 40px;
+  border: 1px solid var(--border-2);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--accent);
+  padding: 9px 14px;
+  font-size: 12.5px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+.dm-currency:hover {
+  background: var(--surface-2);
+  color: var(--accent);
+}
+
 /* Buttons */
 .dm-btn {
   display: inline-flex;
@@ -575,6 +597,12 @@ select {
     padding: 14px 0 0;
   }
 
+  .dm-mobile-menu__system-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 6px;
+  }
+
   .dm-mobile-menu__label {
     color: var(--text-3);
     font-size: 11px;
@@ -596,6 +624,11 @@ select {
     padding: 0 12px;
     font-size: 14px;
     font-weight: 700;
+  }
+
+  .dm-mobile-menu__system-actions .dm-currency,
+  .dm-mobile-menu__system-actions button {
+    justify-content: center;
   }
 
   .dm-mobile-menu__group a.active,
@@ -4109,7 +4142,8 @@ select {
 }
 
 .dm-listing-form-field input,
-.dm-listing-form-field textarea {
+.dm-listing-form-field textarea,
+.dm-listing-form-field select {
   width: 100%;
   min-height: 46px;
   border: 1px solid var(--border);
@@ -4126,9 +4160,15 @@ select {
 }
 
 .dm-listing-form-field input:focus,
-.dm-listing-form-field textarea:focus {
+.dm-listing-form-field textarea:focus,
+.dm-listing-form-field select:focus {
   border-color: color-mix(in oklch, var(--accent) 72%, transparent);
   box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+.dm-listing-form-field select option {
+  background: #0f1a2e;
+  color: var(--text);
 }
 
 .dm-listing-form-location {

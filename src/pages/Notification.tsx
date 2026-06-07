@@ -100,7 +100,7 @@ const rangeFields = [
     ['Кімнати', 'minNumbersOfRoom', 'maxNumbersOfRoom', 'від', 'до'],
     ['Площа, м2', 'minTotalArea', 'maxTotalArea', 'від', 'до'],
     ['Поверх', 'minFloor', 'maxFloor', 'від', 'до'],
-    ['Ціна, $', 'minPrice', 'maxPrice', 'від', 'до'],
+    ['Ціна, ₴', 'minPrice', 'maxPrice', 'від', 'до'],
 ] as const;
 
 const Notification = () => {

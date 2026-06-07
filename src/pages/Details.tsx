@@ -8,6 +8,7 @@ import { useLanguage } from '../LanguageProvider';
 import { useAppSelector, useIsAdmin } from '../app/hooks';
 import { fetchListings } from '../services/ListingService';
 import { useFavorites } from '../hooks/useFavorites';
+import { useCurrency } from '../CurrencyProvider';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
@@ -45,11 +46,6 @@ const getGallery = (listing?: DetailsListing | null): GalleryItem[] => {
 };
 
 const isVideoMedia = (item?: GalleryItem) => item?.type === 'video';
-
-const formatPrice = (price: number | string) => {
-    const numeric = Number(String(price).replace(/[^\d.]/g, ''));
-    return Number.isFinite(numeric) ? numeric.toLocaleString('uk-UA') : String(price);
-};
 
 const formatDate = (value?: number | string) => {
     if (!value) return 'Не вказано';
@@ -92,6 +88,7 @@ const Details = () => {
     const { listingId } = useParams<{ listingId: string }>();
     const navigate = useNavigate();
     const { translate } = useLanguage();
+    const { formatPrice } = useCurrency();
     const isAdmin = useIsAdmin();
     const { isFavorite: isFavoriteListing, toggleFavorite } = useFavorites();
     const { isRegistered, userName, userId } = useAppSelector((state) => state.registration);
@@ -380,7 +377,7 @@ const Details = () => {
                                     <h1 className="dm-h2">{getListingTitle(listing)}</h1>
                                 </div>
                                 <div className="dm-details-price">
-                                    ₴{formatPrice(listing.price)}
+                                    {formatPrice(listing.price, listing.currency)}
                                     {listing.listingType === 'rent' ? <span>{translate('mapSection.properties.perMonth')}</span> : null}
                                 </div>
                             </div>

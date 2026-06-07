@@ -4,6 +4,7 @@ import { useSelector } from 'react-redux';
 import { addListingWithComparison, fetchListingById, updateListing } from '../services/ListingService';
 import { Icons } from '../components/Icons';
 import type { RootState } from '../store/store';
+import { useCurrency, type Currency } from '../CurrencyProvider';
 
 type ListingType = 'sale' | 'rent';
 
@@ -20,6 +21,7 @@ interface FormState {
     contact: string;
     location: string;
     price: string;
+    currency: Currency;
 }
 
 interface MediaAsset {
@@ -40,6 +42,7 @@ interface ExistingListing {
     contact?: string;
     location?: string;
     price?: string | number;
+    currency?: Currency | string;
     image?: string[];
     video?: string[];
     videoUrl?: string;
@@ -77,6 +80,7 @@ const initialForm = (listingType: ListingType): FormState => ({
     contact: '',
     location: '',
     price: '',
+    currency: 'UAH',
 });
 
 const getListingTypeFromParam = (value: string | null): ListingType => (value === 'rent' ? 'rent' : 'sale');
@@ -229,6 +233,7 @@ export default function ListingForm() {
     const isAuthenticated = useSelector((state: RootState) => state.auth.isLogin);
     const authChecking = useSelector((state: RootState) => state.auth.isChecking);
     const canUseExtendedMedia = isPrivilegedMediaUser(subscribeType, role);
+    const { formatPrice } = useCurrency();
     const imageLimit = canUseExtendedMedia ? 8 : 6;
 
     const [form, setForm] = useState<FormState>(() => initialForm(preferredListingType));
@@ -302,6 +307,7 @@ export default function ListingForm() {
                     contact: listing.contact || '',
                     location: listing.location || '',
                     price: String(listing.price ?? ''),
+                    currency: listing.currency === 'USD' ? 'USD' : 'UAH',
                 });
                 setImages((listing.image || []).filter(Boolean).map(toMediaAsset));
                 setVideoAsset(videoUrl ? toMediaAsset(videoUrl) : null);
@@ -617,6 +623,13 @@ export default function ListingForm() {
                         />
                         <div className="dm-listing-form-grid">
                             <TextField label="Ціна" name="price" type="number" value={form.price} onChange={handleInputChange} />
+                            <label className="dm-listing-form-field">
+                                <span>Валюта ціни</span>
+                                <select value={form.currency} onChange={(event) => updateForm('currency', event.target.value as Currency)}>
+                                    <option value="UAH">₴ UAH</option>
+                                    <option value="USD">$ USD</option>
+                                </select>
+                            </label>
                             <TextField label="Контакт" name="contact" value={form.contact} onChange={handleInputChange} />
                         </div>
                         <div className="dm-listing-form-location">
@@ -670,7 +683,7 @@ export default function ListingForm() {
                                 <span>{listingTypeLabel}</span>
                                 <em>{images.length}/{imageLimit} фото</em>
                             </div>
-                            <strong>{form.price ? `₴${form.price}` : 'Ціна не вказана'}</strong>
+                            <strong>{form.price ? formatPrice(form.price, form.currency) : 'Ціна не вказана'}</strong>
                             <p>{form.apartmentDetails || propertyLabel}</p>
                             <div className="dm-listing-preview-card__chips">
                                 {form.numbersOfRooms ? <span>{form.numbersOfRooms} кімн</span> : null}

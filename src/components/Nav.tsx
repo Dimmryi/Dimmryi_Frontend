@@ -14,6 +14,7 @@ import {
     setSubscribeExpired,
 } from '../features/registration/registrationSlice';
 import { useSubscription } from '../hooks/useSubscription';
+import { useCurrency } from '../CurrencyProvider';
 import type { RootState } from '../store/store';
 
 type IconName =
@@ -73,6 +74,7 @@ export const Nav = () => {
     const location = useLocation();
     const dispatch = useDispatch();
     const { checkAuth, handleResetUserData } = useAuth();
+    const { displayCurrency, toggleCurrency } = useCurrency();
     const [isProfileOpen, setIsProfileOpen] = useState(false);
     const [isServicesOpen, setIsServicesOpen] = useState(false);
     const [isMobileOpen, setIsMobileOpen] = useState(false);
@@ -114,7 +116,7 @@ export const Nav = () => {
 
     const authCta = useMemo(() => {
         if (isRegistered && isSessionAlive) {
-            return { label: translate('nav.profile') || 'Мій профіль', to: '/my-listings', mode: 'profile' };
+            return { label: language === 'uk' ? 'Профіль' : 'Profile', to: '/my-listings', mode: 'profile' };
         }
 
         if (isRegistered && !isSessionAlive) {
@@ -125,6 +127,7 @@ export const Nav = () => {
     }, [isRegistered, isSessionAlive, translate]);
 
     const postLabel = (translate('nav.post') || 'Розмістити').replace(/^\s*\+\s*/, '');
+    const currencyLabel = displayCurrency === 'UAH' ? '₴ / $' : '$ / ₴';
 
     useEffect(() => {
         checkAuth().then(({ isAuthenticated: serverAuth, user, expiresAt }) => {
@@ -257,6 +260,18 @@ export const Nav = () => {
             </Link>
         );
     };
+
+    const renderCurrencySwitch = (isMobile = false) => (
+        <button
+            className={`dm-currency ${isMobile ? 'is-mobile' : ''}`}
+            onClick={toggleCurrency}
+            aria-label={language === 'uk' ? 'Перемкнути валюту' : 'Switch currency'}
+            type="button"
+            title={language === 'uk' ? 'Перемкнути валюту' : 'Switch currency'}
+        >
+            {currencyLabel}
+        </button>
+    );
 
     const renderPrimaryItem = (link: (typeof primaryLinks)[number]) => (
         <li key={link.to}>
@@ -402,6 +417,7 @@ export const Nav = () => {
                     {language === 'uk' ? 'EN' : 'UA'}
                 </button>
                 {renderProfileMenu()}
+                {renderCurrencySwitch()}
                 <button className="dm-btn dm-btn--accent dm-nav__post" type="button" onClick={handlePostListing}>
                     <NavIcon name="plus" />
                     {postLabel}
@@ -462,10 +478,13 @@ export const Nav = () => {
 
                 <div className="dm-mobile-menu__group">
                     <div className="dm-mobile-menu__label">Система</div>
-                    <button type="button" onClick={() => setLanguage(language === 'uk' ? 'en' : 'uk')}>
-                        <NavIcon name="globe" />
-                        {language === 'uk' ? 'English' : 'Українська'}
-                    </button>
+                    <div className="dm-mobile-menu__system-actions">
+                        <button type="button" onClick={() => setLanguage(language === 'uk' ? 'en' : 'uk')}>
+                            <NavIcon name="globe" />
+                            {language === 'uk' ? 'English' : 'Українська'}
+                        </button>
+                        {renderCurrencySwitch(true)}
+                    </div>
                 </div>
             </aside>
         </nav>

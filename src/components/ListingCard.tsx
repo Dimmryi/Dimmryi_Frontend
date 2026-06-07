@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import { useLanguage } from '../LanguageProvider';
 import { Icons } from './Icons';
 import { useFavorites } from '../hooks/useFavorites';
+import { useCurrency } from '../CurrencyProvider';
 
 export interface Listing {
   _id: string;
@@ -22,6 +23,7 @@ export interface Listing {
   numberOfFloor?: number;
   numberOfStoreysOfBuilding?: number;
   typeOfNovelty?: string;
+  currency?: 'UAH' | 'USD' | string;
 }
 
 interface ListingCardProps {
@@ -63,6 +65,7 @@ const labels = {
 
 const ListingCard = ({ listing, scrollY = 0, onSaveScroll = () => undefined }: ListingCardProps) => {
   const { language } = useLanguage();
+  const { formatPrice } = useCurrency();
   const { isFavorite, toggleFavorite } = useFavorites();
   const t = labels[language === 'en' ? 'en' : 'uk'];
 
@@ -110,7 +113,7 @@ const ListingCard = ({ listing, scrollY = 0, onSaveScroll = () => undefined }: L
           {listing.listingNumber ? <em>#{listing.listingNumber}</em> : null}
         </div>
         <div className="dm-listing-card__price">
-          ₴{listing.price}
+          {formatPrice(listing.price, listing.currency)}
           {isRent && <span>{t.perMonth}</span>}
         </div>
         <div className="dm-listing-card__chips">

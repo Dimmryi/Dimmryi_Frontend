@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useAppSelector, useIsAdmin } from '../app/hooks';
 import { Icons } from './Icons';
 import { PlaceholderImage } from './PlaceholderImage';
+import { useCurrency } from '../CurrencyProvider';
 
 interface Comment {
     _id: string;
@@ -25,6 +26,7 @@ interface CommentListing {
     apartmentDetails?: string;
     description?: string;
     price: number | string;
+    currency?: string;
     image?: Array<string | null>;
     owner?: string;
     ownerId?: string;
@@ -68,6 +70,7 @@ const MyComments = () => {
     const userName = useAppSelector((state) => state.registration.userName);
     const userId = useAppSelector((state) => state.registration.userId);
     const isAdmin = useIsAdmin();
+    const { formatPrice } = useCurrency();
 
     const [listings, setListings] = useState<CommentListing[]>([]);
     const [comments, setComments] = useState<Comment[]>([]);
@@ -258,7 +261,7 @@ const MyComments = () => {
                                         {listing ? (
                                             <>
                                                 <div className="dm-my-comment-card__price">
-                                                    ₴{listing.price}
+                                                    {formatPrice(listing.price, listing.currency)}
                                                     {isRent ? <span>/ міс</span> : null}
                                                 </div>
                                                 <div className="dm-my-comment-card__specs">

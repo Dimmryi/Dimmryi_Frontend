@@ -68,7 +68,8 @@ const getListingAddress = (request: AdminVerificationRequest) => {
 
 const getListingPrice = (request: AdminVerificationRequest) => {
     const price = listingText(request.listing, 'price');
-    return price ? `${price} $` : 'Ціну не вказано';
+    const currency = listingText(request.listing, 'currency') === 'USD' ? '$' : '₴';
+    return price ? `${currency}${price}` : 'Ціну не вказано';
 };
 
 const AdminVerifications = () => {

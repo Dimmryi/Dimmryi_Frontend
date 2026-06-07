@@ -4,6 +4,7 @@ import ListingCard, { type Listing } from '../components/ListingCard';
 import Pagination from '../components/Pagination';
 import { fetchListings } from '../services/ListingService';
 import { useLanguage } from '../LanguageProvider';
+import { useCurrency } from '../CurrencyProvider';
 
 const PAGE_SIZE = 18;
 
@@ -29,6 +30,7 @@ const isPublishedToday = (date: number | string | undefined) => {
 
 export default function Listings() {
   const { translate } = useLanguage();
+  const { convertPrice } = useCurrency();
   const [searchParams, setSearchParams] = useSearchParams();
   const [listings, setListings] = useState<Listing[]>([]);
   const [loading, setLoading] = useState(true);
@@ -79,7 +81,7 @@ export default function Listings() {
 
     return listings
       .filter((listing) => {
-        const price = parseNumber(listing.price);
+        const price = convertPrice(parseNumber(listing.price), listing.currency);
         const area = Number(listing.totalArea || 0);
         const rooms = Number(listing.numbersOfRooms || 0);
         const targetRooms = filters.rooms === '5+' ? 5 : Number(filters.rooms || 0);
@@ -102,7 +104,7 @@ export default function Listings() {
         const bDate = Number(b.date || 0);
         return filters.novelty === 'oldToNew' ? aDate - bDate : bDate - aDate;
       });
-  }, [filters, listings]);
+  }, [convertPrice, filters, listings]);
 
   const totalPages = Math.max(1, Math.ceil(filteredListings.length / PAGE_SIZE));
   const displayedListings = useMemo(

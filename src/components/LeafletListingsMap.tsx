@@ -3,6 +3,7 @@ import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import type { Listing } from './ListingCard';
 import type { IFilterMapState } from '../features/filterMap/filterMapSlice';
+import { useCurrency } from '../CurrencyProvider';
 
 const COORDS_CACHE_KEY = 'coordsCache';
 const GEOCODE_DELAY_MS = 1100;
@@ -44,13 +45,6 @@ const haversineKm = (lat1: number, lon1: number, lat2: number, lon2: number) => 
     return radius * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 };
 
-const formatPrice = (price: number | string, listingType: string) => {
-    const numeric = Number(price);
-    if (!Number.isFinite(numeric)) return String(price);
-    if (listingType !== 'rent' && numeric >= 1000) return `${Math.round(numeric / 1000)}k`;
-    return String(price);
-};
-
 const geocode = async (location: string): Promise<Coordinates | null> => {
     const response = await fetch(
         `https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(location)}`,
@@ -62,16 +56,15 @@ const geocode = async (location: string): Promise<Coordinates | null> => {
     return { lat: Number(first.lat), lon: Number(first.lon) };
 };
 
-const makePriceIcon = (listing: Listing, isActive: boolean) => {
+const makePriceIcon = (listing: Listing, isActive: boolean, formatListingPrice: (listing: Listing) => string) => {
     const isRent = listing.listingType === 'rent';
-    const price = formatPrice(listing.price, listing.listingType);
-    const label = `${price}${isRent ? '/міс' : ''}`;
+    const label = `${formatListingPrice(listing)}${isRent ? '/міс' : ''}`;
 
     return L.divIcon({
         className: 'dm-leaflet-marker',
         html: `
             <button class="dm-leaflet-marker__pin ${isActive ? 'is-active' : ''} ${isRent ? 'is-rent' : 'is-sale'}">
-                <span>₴${label}</span>
+                <span>${label}</span>
             </button>
         `,
         iconSize: [82, 34],
@@ -97,7 +90,9 @@ const LeafletListingsMap = ({ listings, filter, activeId, expanded = false, comm
     const centerMarkerRef = useRef<L.Marker | null>(null);
     const activeIdRef = useRef(activeId);
     const onPickRef = useRef(onPick);
+    const { displayCurrency, formatPrice } = useCurrency();
     const [isResolving, setIsResolving] = useState(false);
+    const formatListingPrice = (listing: Listing) => formatPrice(listing.price, listing.currency, { compact: true });
 
     const filterKey = useMemo(() => JSON.stringify(filter), [filter]);
     const listingsKey = useMemo(
@@ -112,9 +107,9 @@ const LeafletListingsMap = ({ listings, filter, activeId, expanded = false, comm
     useEffect(() => {
         activeIdRef.current = activeId;
         markerListingByIdRef.current.forEach((listing, id) => {
-            markerByIdRef.current.get(id)?.setIcon(makePriceIcon(listing, id === activeId));
+            markerByIdRef.current.get(id)?.setIcon(makePriceIcon(listing, id === activeId, formatListingPrice));
         });
-    }, [activeId]);
+    }, [activeId, displayCurrency]);
 
     useEffect(() => {
         if (!containerRef.current || mapRef.current) return;
@@ -215,7 +210,7 @@ const LeafletListingsMap = ({ listings, filter, activeId, expanded = false, comm
             const addMarker = (listing: Listing, coords: Coordinates) => {
                 if (!passes(listing, coords)) return;
                 const marker = L.marker([coords.lat, coords.lon], {
-                    icon: makePriceIcon(listing, listing._id === activeIdRef.current),
+                    icon: makePriceIcon(listing, listing._id === activeIdRef.current, formatListingPrice),
                 });
 
                 marker.on('click', () => onPickRef.current(listing));
@@ -272,7 +267,7 @@ const LeafletListingsMap = ({ listings, filter, activeId, expanded = false, comm
                     cache[listing.location] = coords;
                     if (!cancelled && passes(listing, coords)) {
                         const marker = L.marker([coords.lat, coords.lon], {
-                            icon: makePriceIcon(listing, listing._id === activeIdRef.current),
+                            icon: makePriceIcon(listing, listing._id === activeIdRef.current, formatListingPrice),
                         });
                         marker.on('click', () => onPickRef.current(listing));
                         markerByIdRef.current.set(listing._id, marker);
