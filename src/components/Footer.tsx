@@ -61,10 +61,10 @@ export const Footer = () => {
                     h={translate('footer.sections.company')}
                     links={[
                         { label: translate('footer.links.about'), to: '/about' },
-                        { label: translate('footer.links.careers'), to: '/services' },
-                        { label: translate('footer.links.press'), to: '/services' },
+                        { label: translate('footer.links.careers'), to: '/for-agents' },
+                        { label: translate('footer.links.press'), to: '/socials' },
                         { label: translate('footer.links.partners'), to: '/services' },
-                        { label: translate('footer.links.contacts'), to: '/services' },
+                        { label: translate('footer.links.contacts'), to: '/contacts' },
                     ]}
                 />
             </div>
