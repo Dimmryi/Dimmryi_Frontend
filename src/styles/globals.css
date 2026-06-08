@@ -6623,8 +6623,19 @@ select {
 }
 .dm-feat__media {
   position: relative;
+  display: block;
   aspect-ratio: 4/3;
   overflow: hidden;
+}
+.dm-feat__media img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+  transition: transform 0.28s ease;
+}
+.dm-feat__card:hover .dm-feat__media img {
+  transform: scale(1.035);
 }
 .dm-feat__tag {
   position: absolute;
@@ -6639,6 +6650,17 @@ select {
   text-transform: uppercase;
   letter-spacing: 0.04em;
 }
+.dm-feat__tag.is-premium {
+  background: #fff7df;
+}
+.dm-feat__tag.is-rent {
+  background: #e9f2ff;
+  color: #0f2f57;
+}
+.dm-feat__tag.is-top {
+  background: #0f2f57;
+  color: #ffffff;
+}
 .dm-feat__fav {
   position: absolute;
   top: 14px;
@@ -6651,9 +6673,24 @@ select {
   border: none;
   border-radius: 50%;
   color: #1a0f02;
+  cursor: pointer;
+  transition:
+    background 0.16s ease,
+    color 0.16s ease,
+    transform 0.16s ease;
+}
+.dm-feat__fav:hover {
+  transform: translateY(-1px);
+}
+.dm-feat__fav.is-active {
+  background: var(--accent);
+  color: #1a0f02;
 }
 .dm-feat__body {
+  display: block;
   padding: 20px;
+  color: inherit;
+  text-decoration: none;
 }
 .dm-feat__price {
   font-family: var(--font-display);
@@ -6665,10 +6702,47 @@ select {
   font-size: 16px;
   font-weight: 600;
   margin: 6px 0 2px;
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
 }
 .dm-feat__spec {
   font-size: 12.5px;
   color: var(--text-3);
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+.dm-feat__empty {
+  min-height: 220px;
+  display: grid;
+  place-items: center;
+  border: 1px dashed var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--text-3);
+  text-align: center;
+  padding: 28px;
+}
+.dm-feat__empty span {
+  width: 42px;
+  height: 42px;
+  border: 3px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 999px;
+  animation: dm-spin 0.9s linear infinite;
+}
+.dm-feat__empty p {
+  margin: 0;
+  max-width: 420px;
+  line-height: 1.6;
+}
+@keyframes dm-spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* ============================================================

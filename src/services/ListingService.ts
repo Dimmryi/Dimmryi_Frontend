@@ -1,8 +1,26 @@
+import type { Listing } from '../components/ListingCard';
+
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
+export interface FeaturedListingSlot {
+    slot: 'new' | 'premium' | 'rent' | 'top';
+    listing: Listing;
+}
 
 export const fetchListings = async () => {
     const response = await fetch(`${API_URL}/listings`);
     return response.json();
+};
+
+export const fetchFeaturedListings = async (): Promise<FeaturedListingSlot[]> => {
+    const response = await fetch(`${API_URL}/api/featured-listings`);
+    const data = await response.json().catch(() => null);
+
+    if (!response.ok) {
+        throw new Error(data?.message || data?.error || `Failed to fetch featured listings: ${response.status}`);
+    }
+
+    return Array.isArray(data?.items) ? data.items : [];
 };
 
 export const addListing = async (listingData: Record<string, unknown>) => {

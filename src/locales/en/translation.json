@@ -139,9 +139,9 @@
         "watermark": "Dream Home · Interactive map"
     },
     "featured": {
-        "eyebrow": "03 · Editor's picks",
-        "title": "Featured properties of the week",
-        "allRecommendations": "All recommendations"
+        "eyebrow": "03 · Current picks",
+        "title": "Fresh and notable properties",
+        "allRecommendations": "All listings"
     },
     "categories": {
         "eyebrow": "04 · Categories",

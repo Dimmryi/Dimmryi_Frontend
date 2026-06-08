@@ -24,6 +24,17 @@ export interface Listing {
   numberOfStoreysOfBuilding?: number;
   typeOfNovelty?: string;
   currency?: 'UAH' | 'USD' | string;
+  ownerId?: string;
+  ownerSubscribeType?: 'Free' | 'Standard' | 'Premium' | string;
+  ownerSubscribeExpired?: string | Date | null;
+  ownerHasActivePaidSubscription?: boolean;
+  favoriteCount?: number;
+  lastFavoritedAt?: string | null;
+  isPromoted?: boolean;
+  promotionStatus?: 'none' | 'pending' | 'active' | 'expired' | string;
+  promotionStartedAt?: string | Date;
+  promotionExpiresAt?: string | Date;
+  promotionPriority?: number;
 }
 
 interface ListingCardProps {
