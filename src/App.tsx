@@ -19,6 +19,7 @@ const Agents = lazy(() => import('./pages/Agents'));
 const ForAgents = lazy(() => import('./pages/ForAgents'));
 const Socials = lazy(() => import('./pages/Socials'));
 const Contacts = lazy(() => import('./pages/Contacts'));
+const Partners = lazy(() => import('./pages/Partners'));
 const About = lazy(() => import('./pages/About'));
 const MyAgentProfile = lazy(() => import('./pages/MyAgentProfile'));
 const AccountPlaceholder = lazy(() => import('./pages/AccountPlaceholder'));
@@ -78,6 +79,7 @@ function App() {
                                 <Route path="for-agents" element={<ForAgents />} />
                                 <Route path="socials" element={<Socials />} />
                                 <Route path="contacts" element={<Contacts />} />
+                                <Route path="partners" element={<Partners />} />
                                 <Route path="about" element={<About />} />
                                 <Route path="promotion-your-listing" element={<AccountPlaceholder title="Просування оголошення" />} />
                                 <Route path="subscription" element={<Subscription />} />

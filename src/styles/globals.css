@@ -1791,6 +1791,217 @@ select {
 }
 
 /* ============================================================
+   PARTNERS
+   ============================================================ */
+.dm-partners-page {
+  min-height: calc(100vh - 81px);
+  padding: 118px 20px 72px;
+}
+
+.dm-partners-hero,
+.dm-partners-section,
+.dm-partners-principles,
+.dm-partners-links {
+  width: min(1120px, 100%);
+  margin: 0 auto;
+}
+
+.dm-partners-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(280px, 0.85fr);
+  gap: 28px;
+  align-items: stretch;
+}
+
+.dm-partners-hero h1,
+.dm-partners-section-head h2 {
+  margin: 0;
+  color: var(--text);
+  font-family: var(--font-display);
+  letter-spacing: -0.03em;
+}
+
+.dm-partners-hero h1 {
+  max-width: 820px;
+  font-size: clamp(36px, 5vw, 64px);
+  line-height: 1;
+}
+
+.dm-partners-hero p,
+.dm-partners-note p,
+.dm-partners-grid p,
+.dm-partners-format-list p,
+.dm-partners-principles__grid p,
+.dm-partners-link-list p {
+  color: var(--text-2);
+  line-height: 1.68;
+}
+
+.dm-partners-hero > div > p {
+  max-width: 760px;
+  margin: 22px 0 0;
+  font-size: 16px;
+}
+
+.dm-partners-hero__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 28px;
+}
+
+.dm-partners-note,
+.dm-partners-grid article,
+.dm-partners-format-list article,
+.dm-partners-principles__grid article,
+.dm-partners-link-list a {
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: color-mix(in oklch, var(--surface) 86%, transparent);
+}
+
+.dm-partners-note {
+  display: grid;
+  align-content: end;
+  gap: 14px;
+  min-height: 330px;
+  padding: 26px;
+  box-shadow: var(--shadow-md);
+}
+
+.dm-partners-note span,
+.dm-partners-section-head span {
+  color: var(--accent);
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.dm-partners-note strong {
+  color: var(--text);
+  font-family: var(--font-display);
+  font-size: 26px;
+  font-weight: 600;
+  line-height: 1.12;
+  letter-spacing: -0.02em;
+}
+
+.dm-partners-note p {
+  margin: 0;
+  font-size: 14px;
+}
+
+.dm-partners-section,
+.dm-partners-principles,
+.dm-partners-links {
+  margin-top: 64px;
+}
+
+.dm-partners-section-head {
+  max-width: 780px;
+}
+
+.dm-partners-section-head h2 {
+  margin-top: 10px;
+  font-size: clamp(28px, 3.4vw, 44px);
+  line-height: 1.05;
+}
+
+.dm-partners-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: 24px;
+}
+
+.dm-partners-grid article,
+.dm-partners-principles__grid article {
+  padding: 22px;
+}
+
+.dm-partners-grid h3,
+.dm-partners-format-list h3,
+.dm-partners-principles__grid h3,
+.dm-partners-link-list h3 {
+  margin: 0;
+  color: var(--text);
+  font-size: 18px;
+  line-height: 1.25;
+}
+
+.dm-partners-grid p,
+.dm-partners-format-list p,
+.dm-partners-principles__grid p,
+.dm-partners-link-list p {
+  margin: 12px 0 0;
+  font-size: 14px;
+}
+
+.dm-partners-format-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: 24px;
+}
+
+.dm-partners-format-list article {
+  min-height: 156px;
+  padding: 22px;
+}
+
+.dm-partners-principles {
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background:
+    radial-gradient(620px 260px at 100% 0%, rgba(245, 166, 35, 0.1), transparent 64%),
+    color-mix(in oklch, var(--surface) 86%, transparent);
+  padding: 28px;
+}
+
+.dm-partners-principles__grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: 24px;
+}
+
+.dm-partners-principles__grid article {
+  background: var(--surface);
+}
+
+.dm-partners-link-list {
+  display: grid;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.dm-partners-link-list a {
+  display: flex;
+  justify-content: space-between;
+  gap: 22px;
+  align-items: center;
+  padding: 20px 22px;
+  transition:
+    transform 0.16s ease,
+    border-color 0.16s ease,
+    background 0.16s ease;
+}
+
+.dm-partners-link-list a:hover {
+  transform: translateY(-2px);
+  border-color: var(--accent);
+  background: var(--surface-2);
+}
+
+.dm-partners-link-list a > span {
+  flex: 0 0 auto;
+  color: var(--accent);
+  font-size: 13px;
+  font-weight: 900;
+}
+
+/* ============================================================
    SERVICES
    ============================================================ */
 .dm-services-page {
@@ -6778,6 +6989,7 @@ select {
   .dm-for-agents-hero,
   .dm-socials-hero,
   .dm-contacts-hero,
+  .dm-partners-hero,
   .dm-contacts-quick,
   .dm-about-section--split {
     grid-template-columns: 1fr;
@@ -6794,6 +7006,9 @@ select {
   .dm-contacts-note {
     min-height: auto;
   }
+  .dm-partners-note {
+    min-height: auto;
+  }
   .dm-about-values {
     grid-template-columns: 1fr;
   }
@@ -6804,6 +7019,11 @@ select {
     grid-template-columns: 1fr;
   }
   .dm-contacts-grid {
+    grid-template-columns: 1fr;
+  }
+  .dm-partners-grid,
+  .dm-partners-format-list,
+  .dm-partners-principles__grid {
     grid-template-columns: 1fr;
   }
   .dm-verification-hero,
@@ -6970,6 +7190,9 @@ select {
   .dm-contacts-page {
     padding: 86px 14px 42px;
   }
+  .dm-partners-page {
+    padding: 86px 14px 42px;
+  }
   .dm-about-hero h1 {
     font-size: clamp(34px, 12vw, 48px);
   }
@@ -6982,6 +7205,9 @@ select {
   .dm-contacts-hero h1 {
     font-size: clamp(34px, 12vw, 48px);
   }
+  .dm-partners-hero h1 {
+    font-size: clamp(34px, 12vw, 48px);
+  }
   .dm-about-stats {
     grid-template-columns: 1fr;
   }
@@ -6991,7 +7217,10 @@ select {
   .dm-for-agents-links,
   .dm-for-agents-cta,
   .dm-socials-cta,
-  .dm-contacts-quick {
+  .dm-contacts-quick,
+  .dm-partners-section,
+  .dm-partners-principles,
+  .dm-partners-links {
     margin-top: 42px;
   }
   .dm-about-mission {
@@ -7017,8 +7246,16 @@ select {
     align-items: stretch;
     flex-direction: column;
   }
+  .dm-partners-link-list a {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+  .dm-partners-principles {
+    padding: 22px;
+  }
   .dm-contacts-grid .dm-btn,
-  .dm-contacts-hero__actions .dm-btn {
+  .dm-contacts-hero__actions .dm-btn,
+  .dm-partners-hero__actions .dm-btn {
     width: 100%;
   }
   .dm-about-cta .dm-btn,

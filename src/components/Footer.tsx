@@ -63,7 +63,7 @@ export const Footer = () => {
                         { label: translate('footer.links.about'), to: '/about' },
                         { label: translate('footer.links.careers'), to: '/for-agents' },
                         { label: translate('footer.links.press'), to: '/socials' },
-                        { label: translate('footer.links.partners'), to: '/services' },
+                        { label: translate('footer.links.partners'), to: '/partners' },
                         { label: translate('footer.links.contacts'), to: '/contacts' },
                     ]}
                 />
