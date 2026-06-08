@@ -16,6 +16,7 @@ const Details = lazy(() => import('./pages/Details'));
 const ChatPage = lazy(() => import('./pages/ChatPage'));
 const Favorites = lazy(() => import('./pages/Favorites'));
 const Agents = lazy(() => import('./pages/Agents'));
+const About = lazy(() => import('./pages/About'));
 const MyAgentProfile = lazy(() => import('./pages/MyAgentProfile'));
 const AccountPlaceholder = lazy(() => import('./pages/AccountPlaceholder'));
 const Services = lazy(() => import('./pages/Services'));
@@ -71,7 +72,7 @@ function App() {
                                 <Route path="notification" element={<Notification />} />
                                 <Route path="notification/edit/:notificationId" element={<Notification />} />
                                 <Route path="agents" element={<Agents />} />
-                                <Route path="about" element={<AccountPlaceholder title="Про нас" />} />
+                                <Route path="about" element={<About />} />
                                 <Route path="promotion-your-listing" element={<AccountPlaceholder title="Просування оголошення" />} />
                                 <Route path="subscription" element={<Subscription />} />
                                 <Route path="my-listings" element={<MyListings />} />

@@ -54,13 +54,13 @@ export const Footer = () => {
                         { label: translate('footer.links.tariffs'), to: '/subscription' },
                         { label: translate('footer.links.verification'), to: '/verification' },
                         { label: translate('footer.links.priceAnalytics'), to: '/price-analytics' },
-                        { label: translate('footer.links.dealSecurity'), to: '/services' },
+                        { label: translate('footer.links.dealSecurity'), to: '/agreement' },
                     ]}
                 />
                 <FooterCol
                     h={translate('footer.sections.company')}
                     links={[
-                        { label: translate('footer.links.about'), to: '/services' },
+                        { label: translate('footer.links.about'), to: '/about' },
                         { label: translate('footer.links.careers'), to: '/services' },
                         { label: translate('footer.links.press'), to: '/services' },
                         { label: translate('footer.links.partners'), to: '/services' },

@@ -23,6 +23,32 @@ type MapCommandType = 'zoomIn' | 'zoomOut' | 'locate';
 type MapCommand = { type: MapCommandType; id: number };
 
 const MAP_ROOM_OPTIONS = [0, 1, 2, 3, 4, '5+'] as const;
+const PRICE_RANGE_MAX_BY_MODE_USD: Record<FilterMode, number> = {
+    all: 500000,
+    sale: 500000,
+    rent: 5000,
+};
+const PRICE_RANGE_STEP_BY_MODE_USD: Record<FilterMode, number> = {
+    all: 1000,
+    sale: 1000,
+    rent: 50,
+};
+const PRICE_SLIDER_MAX = 100;
+const PRICE_TANGENT_MAX_RADIANS = (85 * Math.PI) / 180;
+
+const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value));
+
+const sliderToPriceRatio = (value: number) => {
+    const normalized = clamp(value, 0, PRICE_SLIDER_MAX) / PRICE_SLIDER_MAX;
+
+    return Math.tan(normalized * PRICE_TANGENT_MAX_RADIANS) / Math.tan(PRICE_TANGENT_MAX_RADIANS);
+};
+
+const priceRatioToSlider = (value: number) => {
+    const ratio = clamp(value, 0, 1);
+
+    return (Math.atan(ratio * Math.tan(PRICE_TANGENT_MAX_RADIANS)) / PRICE_TANGENT_MAX_RADIANS) * PRICE_SLIDER_MAX;
+};
 
 const mockListingFromProperty = (property: Property): Listing => ({
     _id: `mock-${property.id}`,
@@ -66,6 +92,8 @@ export const MapSection = ({ accent }: MapSectionProps) => {
     const [filterMode, setFilterMode] = useState<FilterMode>('all');
     const [priceMin, setPriceMin] = useState(0);
     const [priceMax, setPriceMax] = useState(0);
+    const [priceMinSlider, setPriceMinSlider] = useState(0);
+    const [priceMaxSlider, setPriceMaxSlider] = useState(PRICE_SLIDER_MAX);
     const [beds, setBeds] = useState(0);
     const [areaMin, setAreaMin] = useState('');
     const [areaMax, setAreaMax] = useState('');
@@ -79,10 +107,15 @@ export const MapSection = ({ accent }: MapSectionProps) => {
 
     const fallbackListings = useMemo(() => PROPERTIES.map(mockListingFromProperty), []);
     const listingsForMap = mapListings.length > 0 ? mapListings : fallbackListings;
-    const absoluteMaxPrice = useMemo(
-        () => Math.max(...listingsForMap.map((listing) => convertPrice(listing.price, listing.currency)), 0),
-        [convertPrice, listingsForMap],
-    );
+    const priceRangeMaxUsd = PRICE_RANGE_MAX_BY_MODE_USD[filterMode];
+    const priceRangeStepUsd = PRICE_RANGE_STEP_BY_MODE_USD[filterMode];
+    const absoluteMaxPrice = useMemo(() => convertPrice(priceRangeMaxUsd, 'USD'), [convertPrice, priceRangeMaxUsd]);
+    const priceStep = useMemo(() => Math.max(1, Math.round(convertPrice(priceRangeStepUsd, 'USD'))), [convertPrice, priceRangeStepUsd]);
+    const priceSliderStep = 0.5;
+
+    const sliderToDisplayPrice = (value: number) => Math.round(sliderToPriceRatio(value) * absoluteMaxPrice);
+    const displayPriceToSlider = (value: number) =>
+        priceRatioToSlider(absoluteMaxPrice ? value / absoluteMaxPrice : 0);
 
     const filtered = useMemo(() => {
         const selectedRoom = MAP_ROOM_OPTIONS[beds];
@@ -140,7 +173,10 @@ export const MapSection = ({ accent }: MapSectionProps) => {
 
     useEffect(() => {
         if (absoluteMaxPrice <= 0) return;
-        setPriceMax((current) => (current <= 0 ? absoluteMaxPrice : Math.min(current, absoluteMaxPrice)));
+        setPriceMin(0);
+        setPriceMax(absoluteMaxPrice);
+        setPriceMinSlider(0);
+        setPriceMaxSlider(PRICE_SLIDER_MAX);
     }, [absoluteMaxPrice]);
 
     const chipOptions = [
@@ -182,6 +218,8 @@ export const MapSection = ({ accent }: MapSectionProps) => {
         setFilterMode('all');
         setPriceMin(0);
         setPriceMax(absoluteMaxPrice);
+        setPriceMinSlider(0);
+        setPriceMaxSlider(PRICE_SLIDER_MAX);
         setBeds(0);
         setAreaMin('');
         setAreaMax('');
@@ -364,8 +402,13 @@ export const MapSection = ({ accent }: MapSectionProps) => {
                                             type="number"
                                             min="0"
                                             max={priceMax}
+                                            step={priceStep}
                                             value={priceMin}
-                                            onChange={(event) => setPriceMin(Math.min(Number(event.target.value || 0), priceMax))}
+                                            onChange={(event) => {
+                                                const nextPrice = clamp(Number(event.target.value || 0), 0, priceMax);
+                                                setPriceMin(nextPrice);
+                                                setPriceMinSlider(Math.min(displayPriceToSlider(nextPrice), priceMaxSlider));
+                                            }}
                                         />
                                         <em>{currencySymbol}</em>
                                     </div>
@@ -375,10 +418,13 @@ export const MapSection = ({ accent }: MapSectionProps) => {
                                             type="number"
                                             min={priceMin}
                                             max={absoluteMaxPrice}
+                                            step={priceStep}
                                             value={priceMax}
-                                            onChange={(event) =>
-                                                setPriceMax(Math.max(priceMin, Math.min(Number(event.target.value || 0), absoluteMaxPrice)))
-                                            }
+                                            onChange={(event) => {
+                                                const nextPrice = clamp(Number(event.target.value || 0), priceMin, absoluteMaxPrice);
+                                                setPriceMax(nextPrice);
+                                                setPriceMaxSlider(Math.max(displayPriceToSlider(nextPrice), priceMinSlider));
+                                            }}
                                         />
                                         <em>{currencySymbol}</em>
                                     </div>
@@ -388,29 +434,37 @@ export const MapSection = ({ accent }: MapSectionProps) => {
                                         <div
                                             className="dm-range__fill"
                                             style={{
-                                                left: `${absoluteMaxPrice ? (priceMin / absoluteMaxPrice) * 100 : 0}%`,
-                                                width: `${absoluteMaxPrice ? ((priceMax - priceMin) / absoluteMaxPrice) * 100 : 0}%`,
+                                                left: `${priceMinSlider}%`,
+                                                width: `${priceMaxSlider - priceMinSlider}%`,
                                             }}
                                         />
-                                        <div className="dm-range__handle" style={{ left: `${absoluteMaxPrice ? (priceMin / absoluteMaxPrice) * 100 : 0}%` }} />
-                                        <div className="dm-range__handle" style={{ left: `${absoluteMaxPrice ? (priceMax / absoluteMaxPrice) * 100 : 0}%` }} />
+                                        <div className="dm-range__handle" style={{ left: `${priceMinSlider}%` }} />
+                                        <div className="dm-range__handle" style={{ left: `${priceMaxSlider}%` }} />
                                     </div>
                                     <input
                                         type="range"
                                         min="0"
-                                        max={absoluteMaxPrice}
-                                        step="50"
-                                        value={priceMin}
-                                        onChange={(event) => setPriceMin(Math.min(Number(event.target.value), priceMax))}
+                                        max={PRICE_SLIDER_MAX}
+                                        step={priceSliderStep}
+                                        value={priceMinSlider}
+                                        onChange={(event) => {
+                                            const nextSlider = Math.min(Number(event.target.value), priceMaxSlider);
+                                            setPriceMinSlider(nextSlider);
+                                            setPriceMin(Math.min(sliderToDisplayPrice(nextSlider), priceMax));
+                                        }}
                                         className="dm-range__native dm-range__native--min"
                                     />
                                     <input
                                         type="range"
                                         min="0"
-                                        max={absoluteMaxPrice}
-                                        step="50"
-                                        value={priceMax}
-                                        onChange={(event) => setPriceMax(Math.max(Number(event.target.value), priceMin))}
+                                        max={PRICE_SLIDER_MAX}
+                                        step={priceSliderStep}
+                                        value={priceMaxSlider}
+                                        onChange={(event) => {
+                                            const nextSlider = Math.max(Number(event.target.value), priceMinSlider);
+                                            setPriceMaxSlider(nextSlider);
+                                            setPriceMax(Math.max(sliderToDisplayPrice(nextSlider), priceMin));
+                                        }}
                                         className="dm-range__native dm-range__native--max"
                                     />
                                     <div className="dm-range__labels">

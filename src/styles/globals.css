@@ -983,6 +983,248 @@ select {
 }
 
 /* ============================================================
+   ABOUT
+   ============================================================ */
+.dm-about-page {
+  min-height: calc(100vh - 81px);
+  padding: 118px 20px 72px;
+}
+
+.dm-about-hero,
+.dm-about-stats,
+.dm-about-mission,
+.dm-about-section,
+.dm-about-cta {
+  width: min(1120px, 100%);
+  margin: 0 auto;
+}
+
+.dm-about-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(280px, 0.75fr);
+  gap: 28px;
+  align-items: stretch;
+}
+
+.dm-about-hero h1,
+.dm-about-mission h2,
+.dm-about-section h2,
+.dm-about-cta h2 {
+  margin: 0;
+  font-family: var(--font-display);
+  color: var(--text);
+  letter-spacing: -0.03em;
+}
+
+.dm-about-hero h1 {
+  max-width: 760px;
+  font-size: clamp(36px, 5vw, 68px);
+  line-height: 0.98;
+}
+
+.dm-about-hero p,
+.dm-about-mission p,
+.dm-about-section p,
+.dm-about-cta p,
+.dm-about-card p {
+  color: var(--text-2);
+  line-height: 1.7;
+}
+
+.dm-about-hero > div > p {
+  max-width: 720px;
+  margin: 22px 0 0;
+  font-size: 16px;
+}
+
+.dm-about-hero__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 28px;
+}
+
+.dm-about-card,
+.dm-about-stats article,
+.dm-about-mission,
+.dm-about-values article,
+.dm-about-timeline article,
+.dm-about-cta {
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: color-mix(in oklch, var(--surface) 86%, transparent);
+}
+
+.dm-about-card {
+  display: grid;
+  align-content: end;
+  gap: 14px;
+  min-height: 360px;
+  padding: 26px;
+  box-shadow: var(--shadow-md);
+}
+
+.dm-about-card span,
+.dm-about-mission span,
+.dm-about-section__head span,
+.dm-about-section--split > div > span,
+.dm-about-cta span {
+  color: var(--accent);
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.dm-about-card strong {
+  color: var(--text);
+  font-family: var(--font-display);
+  font-size: 26px;
+  font-weight: 600;
+  line-height: 1.12;
+  letter-spacing: -0.02em;
+}
+
+.dm-about-card p {
+  margin: 0;
+  font-size: 14px;
+}
+
+.dm-about-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 22px;
+}
+
+.dm-about-stats article {
+  display: grid;
+  gap: 8px;
+  padding: 20px;
+}
+
+.dm-about-stats strong {
+  color: var(--accent);
+  font-family: var(--font-display);
+  font-size: 30px;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.dm-about-stats span {
+  color: var(--text-3);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.dm-about-mission {
+  display: grid;
+  grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
+  gap: 28px;
+  align-items: center;
+  margin-top: 22px;
+  padding: 30px;
+  background:
+    radial-gradient(640px 300px at 100% 0%, color-mix(in oklch, var(--accent) 15%, transparent), transparent 64%),
+    color-mix(in oklch, var(--surface) 88%, transparent);
+}
+
+.dm-about-mission h2 {
+  margin-top: 12px;
+  font-size: clamp(28px, 3.8vw, 48px);
+  line-height: 1.04;
+}
+
+.dm-about-mission p {
+  margin: 0;
+  font-size: 16px;
+}
+
+.dm-about-section {
+  margin-top: 64px;
+}
+
+.dm-about-section__head {
+  max-width: 760px;
+}
+
+.dm-about-section h2,
+.dm-about-cta h2 {
+  margin-top: 10px;
+  font-size: clamp(28px, 3.4vw, 44px);
+  line-height: 1.05;
+}
+
+.dm-about-values {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: 24px;
+}
+
+.dm-about-values article {
+  padding: 22px;
+}
+
+.dm-about-values h3,
+.dm-about-timeline h3 {
+  margin: 0;
+  color: var(--text);
+  font-size: 18px;
+  line-height: 1.25;
+}
+
+.dm-about-values p,
+.dm-about-timeline p {
+  margin: 12px 0 0;
+  font-size: 14px;
+}
+
+.dm-about-section--split {
+  display: grid;
+  grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+  gap: 28px;
+  align-items: start;
+}
+
+.dm-about-section--split > div > p {
+  margin: 16px 0 0;
+}
+
+.dm-about-timeline {
+  display: grid;
+  gap: 12px;
+}
+
+.dm-about-timeline article {
+  display: grid;
+  grid-template-columns: 76px minmax(0, 1fr);
+  gap: 18px;
+  padding: 18px;
+}
+
+.dm-about-timeline strong {
+  color: var(--accent);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  letter-spacing: 0.06em;
+}
+
+.dm-about-cta {
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+  align-items: center;
+  margin-top: 64px;
+  padding: 28px;
+}
+
+.dm-about-cta p {
+  max-width: 720px;
+  margin: 14px 0 0;
+}
+
+/* ============================================================
    SERVICES
    ============================================================ */
 .dm-services-page {
@@ -5173,6 +5415,8 @@ select {
   box-shadow: var(--shadow-sm);
 }
 .dm-range__native {
+  appearance: none;
+  -webkit-appearance: none;
   position: absolute;
   inset: 0;
   width: 100%;
@@ -5180,12 +5424,31 @@ select {
   cursor: pointer;
   margin: 0;
   padding: 0;
+  pointer-events: none;
 }
-.dm-range--dual .dm-range__native--min {
-  z-index: 2;
+
+.dm-range__native::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 28px;
+  height: 28px;
+  pointer-events: auto;
 }
+
+.dm-range__native::-moz-range-thumb {
+  width: 28px;
+  height: 28px;
+  border: 0;
+  background: transparent;
+  pointer-events: auto;
+}
+
+.dm-range--dual .dm-range__native--min,
 .dm-range--dual .dm-range__native--max {
   z-index: 3;
+}
+
+.dm-range--dual .dm-range__native--min {
+  z-index: 4;
 }
 .dm-range__labels {
   display: flex;
@@ -5944,6 +6207,17 @@ select {
     grid-template-columns: 1fr;
     align-items: start;
   }
+  .dm-about-hero,
+  .dm-about-mission,
+  .dm-about-section--split {
+    grid-template-columns: 1fr;
+  }
+  .dm-about-card {
+    min-height: auto;
+  }
+  .dm-about-values {
+    grid-template-columns: 1fr;
+  }
   .dm-verification-hero,
   .dm-verification-layout,
   .dm-verification-submit {
@@ -6095,6 +6369,33 @@ select {
   }
   .dm-services-grid {
     grid-template-columns: 1fr;
+  }
+  .dm-about-page {
+    padding: 86px 14px 42px;
+  }
+  .dm-about-hero h1 {
+    font-size: clamp(34px, 12vw, 48px);
+  }
+  .dm-about-stats {
+    grid-template-columns: 1fr;
+  }
+  .dm-about-section,
+  .dm-about-cta {
+    margin-top: 42px;
+  }
+  .dm-about-mission {
+    padding: 22px;
+  }
+  .dm-about-timeline article {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+  .dm-about-cta {
+    align-items: stretch;
+    flex-direction: column;
+  }
+  .dm-about-cta .dm-btn {
+    width: 100%;
   }
   .dm-verification-grid {
     grid-template-columns: 1fr;
