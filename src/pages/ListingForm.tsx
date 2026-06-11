@@ -244,6 +244,7 @@ export default function ListingForm() {
     const [coords, setCoords] = useState({ lat: 0, lon: 0 });
     const [uploading, setUploading] = useState<'image' | 'video' | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [verifyAfterSubmit, setVerifyAfterSubmit] = useState(false);
     const [message, setMessage] = useState<{ type: 'success' | 'error' | 'info'; text: string } | null>(null);
     const sessionExpiry = Number(localStorage.getItem('sessionExpiry') || 0);
     const isSessionAlive = isAuthenticated && sessionExpiry > Date.now();
@@ -368,6 +369,7 @@ export default function ListingForm() {
                 : 'Тип не вибрано';
     const listingTypeLabel = form.listingType === 'rent' ? 'Оренда' : 'Продаж';
     const coverImage = images[0]?.url;
+    const verificationPath = listingId ? `/verification?listingId=${encodeURIComponent(listingId)}` : '/verification';
 
     const updateForm = (field: keyof FormState, value: string) => {
         setForm((prev) => ({ ...prev, [field]: value }));
@@ -512,7 +514,7 @@ export default function ListingForm() {
             if (isEditMode && listingId) {
                 const response = await updateListing(listingId, payload);
                 setMessage({ type: 'success', text: response?.message || 'Оголошення успішно оновлено.' });
-                navigate(`/details/${listingId}`);
+                navigate(verifyAfterSubmit ? `/verification?listingId=${encodeURIComponent(listingId)}` : `/details/${listingId}`);
                 return;
             }
 
@@ -527,7 +529,11 @@ export default function ListingForm() {
                 return;
             }
             setMessage({ type: 'success', text: response?.message || 'Оголошення успішно опубліковано.' });
-            navigate(createdListingId ? `/details/${createdListingId}` : '/my-listings');
+            if (verifyAfterSubmit && createdListingId) {
+                navigate(`/verification?listingId=${encodeURIComponent(createdListingId)}`);
+            } else {
+                navigate(createdListingId ? `/details/${createdListingId}` : '/my-listings');
+            }
         } catch (error) {
             setMessage({ type: 'error', text: error instanceof Error ? error.message : isEditMode ? 'Не вдалося оновити оголошення.' : 'Не вдалося опублікувати оголошення.' });
         } finally {
@@ -708,6 +714,31 @@ export default function ListingForm() {
                                 </li>
                             ))}
                         </ul>
+                    </div>
+
+                    <div className="dm-listing-verification-card">
+                        <span>Перевірка оголошення</span>
+                        <strong>{isEditMode ? 'Підтвердити власника' : 'Перевірити після публікації'}</strong>
+                        <p>
+                            Документи не потрапляють у публічну галерею. Після модерації оголошення може отримати статус перевіреного.
+                        </p>
+                        {isEditMode && listingId ? (
+                            <Link className="dm-btn dm-btn--accent" to={verificationPath}>
+                                Подати заявку
+                            </Link>
+                        ) : (
+                            <label className="dm-listing-verification-card__check">
+                                <input
+                                    type="checkbox"
+                                    checked={verifyAfterSubmit}
+                                    onChange={(event) => setVerifyAfterSubmit(event.target.checked)}
+                                />
+                                <span>Після публікації перейти до перевірки</span>
+                            </label>
+                        )}
+                        <Link className="dm-listing-verification-card__link" to="/verification">
+                            Як працює перевірка
+                        </Link>
                     </div>
 
                     {isLoadingListing ? <div className="dm-form-message is-info">Завантажую оголошення для редагування...</div> : null}

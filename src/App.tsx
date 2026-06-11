@@ -22,14 +22,15 @@ const Contacts = lazy(() => import('./pages/Contacts'));
 const Partners = lazy(() => import('./pages/Partners'));
 const About = lazy(() => import('./pages/About'));
 const MyAgentProfile = lazy(() => import('./pages/MyAgentProfile'));
-const AccountPlaceholder = lazy(() => import('./pages/AccountPlaceholder'));
 const Services = lazy(() => import('./pages/Services'));
 const Verification = lazy(() => import('./pages/Verification'));
 const AdminVerifications = lazy(() => import('./pages/AdminVerifications'));
+const AdminPromotionRequests = lazy(() => import('./pages/AdminPromotionRequests'));
 const PriceAnalytics = lazy(() => import('./pages/PriceAnalytics'));
 const AdminPriceAnalytics = lazy(() => import('./pages/AdminPriceAnalytics'));
 const Agreement = lazy(() => import('./pages/Agreement'));
 const RealEstateEstimator = lazy(() => import('./pages/RealEstateEstimator'));
+const PromotionYourListing = lazy(() => import('./pages/PromotionYourListing'));
 const Notification = lazy(() => import('./pages/Notification'));
 const Subscription = lazy(() => import('./pages/Subscription'));
 const MyNotification = lazy(() => import('./components/MyNotification'));
@@ -68,11 +69,11 @@ function App() {
                                 <Route path="services" element={<Services />} />
                                 <Route path="verification" element={<Verification />} />
                                 <Route path="admin/verifications" element={<AdminVerifications />} />
+                                <Route path="admin/promotion-requests" element={<AdminPromotionRequests />} />
                                 <Route path="price-analytics" element={<PriceAnalytics />} />
                                 <Route path="admin/price-analytics" element={<AdminPriceAnalytics />} />
                                 <Route path="agreement" element={<Agreement />} />
                                 <Route path="real-estate-estimator" element={<RealEstateEstimator />} />
-                                <Route path="advertising" element={<AccountPlaceholder title="Рекламне відео" />} />
                                 <Route path="notification" element={<Notification />} />
                                 <Route path="notification/edit/:notificationId" element={<Notification />} />
                                 <Route path="agents" element={<Agents />} />
@@ -81,7 +82,7 @@ function App() {
                                 <Route path="contacts" element={<Contacts />} />
                                 <Route path="partners" element={<Partners />} />
                                 <Route path="about" element={<About />} />
-                                <Route path="promotion-your-listing" element={<AccountPlaceholder title="Просування оголошення" />} />
+                                <Route path="promotion-your-listing" element={<PromotionYourListing />} />
                                 <Route path="subscription" element={<Subscription />} />
                                 <Route path="my-listings" element={<MyListings />} />
                                 <Route path="my-comments" element={<MyComments />} />

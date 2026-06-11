@@ -7,7 +7,7 @@ type ServiceItem = {
   descriptionUk: string;
   descriptionEn: string;
   href: string;
-  icon: 'home' | 'search' | 'file' | 'spark' | 'video' | 'bell' | 'agent' | 'trend';
+  icon: 'home' | 'search' | 'file' | 'spark' | 'bell' | 'agent' | 'trend';
   tier: 'free' | 'premium';
 };
 
@@ -49,13 +49,13 @@ const services: ServiceItem[] = [
     tier: 'free',
   },
   {
-    titleUk: 'Рекламне відео',
-    titleEn: 'Advertising video',
-    descriptionUk: 'Промо-відео для оголошень і рекламних блоків на головній сторінці.',
-    descriptionEn: 'Promo videos for listings and featured home-page placements.',
-    href: '/advertising',
-    icon: 'video',
-    tier: 'premium',
+    titleUk: 'Ринкова аналітика',
+    titleEn: 'Market analytics',
+    descriptionUk: 'Динаміка цін за регіонами, типами нерухомості та періодами для більш зважених рішень.',
+    descriptionEn: 'Price dynamics by region, property type, and period for more informed decisions.',
+    href: '/price-analytics',
+    icon: 'trend',
+    tier: 'free',
   },
   {
     titleUk: 'Сповіщення про нові об’єкти',
@@ -121,15 +121,6 @@ const Icon = ({ type }: { type: ServiceItem['icon'] }) => {
         <path d="M6 3h8l4 4v14H6z" />
         <path d="M14 3v5h5" />
         <path d="M9 13h6M9 17h6" />
-      </svg>
-    );
-  }
-
-  if (type === 'video') {
-    return (
-      <svg {...common}>
-        <rect x="3" y="6" width="13" height="12" rx="2" />
-        <path d="m16 10 5-3v10l-5-3z" />
       </svg>
     );
   }

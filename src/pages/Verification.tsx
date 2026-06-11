@@ -1,5 +1,5 @@
 import { ChangeEvent, FormEvent, useEffect, useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { useAppSelector } from '../app/hooks';
 import { useLanguage } from '../LanguageProvider';
 import {
@@ -72,6 +72,8 @@ export default function Verification() {
     const isEnglish = language === 'en';
     const userId = useAppSelector((state) => state.registration.userId);
     const isRegistered = useAppSelector((state) => state.registration.isRegistered);
+    const [searchParams] = useSearchParams();
+    const requestedListingId = searchParams.get('listingId') || '';
 
     const [listings, setListings] = useState<OwnerListing[]>([]);
     const [form, setForm] = useState<VerificationFormState>(initialForm);
@@ -110,8 +112,17 @@ export default function Verification() {
                 const ownerListings = Array.isArray(data) ? data.filter((item) => item?._id) : [];
                 if (!isMounted) return;
                 setListings(ownerListings);
+                const requestedListing = ownerListings.find((listing) => listing._id === requestedListingId);
                 const firstAvailable = ownerListings.find((listing) => canSubmitListing(listing.verificationStatus));
-                setForm((current) => ({ ...current, listingId: firstAvailable?._id || ownerListings[0]?._id || '' }));
+                setForm((current) => ({ ...current, listingId: requestedListing?._id || firstAvailable?._id || ownerListings[0]?._id || '' }));
+                if (requestedListing) {
+                    setMessage({
+                        type: 'info',
+                        text: isEnglish
+                            ? 'The listing from your form is selected. Upload documents to send it for review.'
+                            : 'Оголошення з форми вже вибрано. Завантажте документи, щоб надіслати його на перевірку.',
+                    });
+                }
             } catch (error) {
                 if (!isMounted) return;
                 setMessage({
@@ -132,7 +143,7 @@ export default function Verification() {
         return () => {
             isMounted = false;
         };
-    }, [isEnglish, isRegistered, userId]);
+    }, [isEnglish, isRegistered, requestedListingId, userId]);
 
     const updateForm = <Key extends keyof VerificationFormState>(field: Key, value: VerificationFormState[Key]) => {
         setForm((current) => ({ ...current, [field]: value }));
