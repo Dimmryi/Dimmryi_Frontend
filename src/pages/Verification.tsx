@@ -80,6 +80,7 @@ export default function Verification() {
     const [isLoadingListings, setIsLoadingListings] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [message, setMessage] = useState<{ type: 'success' | 'error' | 'info'; text: string } | null>(null);
+    const [lastSubmittedListingId, setLastSubmittedListingId] = useState('');
 
     const selectedListing = useMemo(
         () => listings.find((listing) => listing._id === form.listingId),
@@ -146,6 +147,7 @@ export default function Verification() {
     }, [isEnglish, isRegistered, requestedListingId, userId]);
 
     const updateForm = <Key extends keyof VerificationFormState>(field: Key, value: VerificationFormState[Key]) => {
+        setLastSubmittedListingId('');
         setForm((current) => ({ ...current, [field]: value }));
     };
 
@@ -195,9 +197,11 @@ export default function Verification() {
 
         try {
             setIsSubmitting(true);
+            setLastSubmittedListingId('');
+            const submittedListingId = form.listingId;
             setMessage({ type: 'info', text: isEnglish ? 'Uploading documents securely...' : 'Безпечно завантажуємо документи...' });
             const files = await Promise.all(form.files.map(uploadVerificationFile));
-            await createVerificationRequest(form.listingId, {
+            await createVerificationRequest(submittedListingId, {
                 requestType: form.requestType,
                 documentType: form.documentType,
                 files,
@@ -206,10 +210,11 @@ export default function Verification() {
 
             setListings((current) =>
                 current.map((listing) =>
-                    listing._id === form.listingId ? { ...listing, verificationStatus: 'pending' } : listing,
+                    listing._id === submittedListingId ? { ...listing, verificationStatus: 'pending' } : listing,
                 ),
             );
             setForm(initialForm);
+            setLastSubmittedListingId(submittedListingId);
             setMessage({
                 type: 'success',
                 text: isEnglish
@@ -367,6 +372,25 @@ export default function Verification() {
                             </label>
 
                             {message ? <p className={`dm-verification-submit__message is-${message.type}`}>{message.text}</p> : null}
+
+                            {lastSubmittedListingId ? (
+                                <div className="dm-verification-submit__next-actions">
+                                    <strong>{isEnglish ? 'What next?' : 'Що далі?'}</strong>
+                                    <p>
+                                        {isEnglish
+                                            ? 'Check how the listing looks publicly, or manage all your listings from your account.'
+                                            : 'Перевірте, як оголошення виглядає публічно, або керуйте всіма оголошеннями у своєму профілі.'}
+                                    </p>
+                                    <div>
+                                        <Link className="dm-btn dm-btn--accent" to={`/details/${lastSubmittedListingId}`}>
+                                            {isEnglish ? 'View listing' : 'Переглянути оголошення'}
+                                        </Link>
+                                        <Link className="dm-btn dm-btn--ghost" to="/my-listings">
+                                            {isEnglish ? 'My listings' : 'Мої оголошення'}
+                                        </Link>
+                                    </div>
+                                </div>
+                            ) : null}
 
                             <button
                                 className="dm-btn dm-btn--accent"

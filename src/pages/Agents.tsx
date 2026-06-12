@@ -179,10 +179,15 @@ export default function Agents() {
                                             <a href={`mailto:${agent.email}`}>{agent.email}</a>
                                         </div>
 
-                                        <button type="button" className="dm-agent-card__cta" onClick={() => handleEmailAgent(agent.email, agent.name)}>
-                                            {isEnglish ? 'Contact agent' : 'Зв’язатися з рієлтором'}
-                                            {Icons.arrow()}
-                                        </button>
+                                        <div className="dm-agent-card__actions">
+                                            <Link to={`/agents/${agent._id}`} className="dm-agent-card__cta is-secondary">
+                                                {isEnglish ? 'Agent listings' : 'Оголошення рієлтора'}
+                                            </Link>
+                                            <button type="button" className="dm-agent-card__cta" onClick={() => handleEmailAgent(agent.email, agent.name)}>
+                                                {isEnglish ? 'Contact agent' : 'Зв’язатися з рієлтором'}
+                                                {Icons.arrow()}
+                                            </button>
+                                        </div>
                                     </div>
                                 </li>
                             );

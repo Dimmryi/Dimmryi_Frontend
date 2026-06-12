@@ -550,8 +550,14 @@ export default function ListingForm() {
                     <p>
                         {isEditMode
                             ? 'Оновіть дані, медіа або координати об’єкта. Після збереження сторінка деталей і ваш список оголошень отримають актуальні дані.'
-                            : 'Заповніть ключові дані про об’єкт. На телефоні форма йде однією сторінкою з короткими секціями, щоб легко повернутися до будь-якого поля.'}
+                            : 'Заповніть ключові дані про об’єкт: фото, опис, ціну, адресу та контакти. Чим точніше оформлене оголошення, тим легше користувачу швидко прийняти рішення.'}
                     </p>
+                    {!isEditMode && !canUseExtendedMedia ? (
+                        <div className="dm-listing-form-plan-hint">
+                            <span>У Free плані доступно до 6 фото. Standard і Premium відкривають більше фото та відео для кращої презентації.</span>
+                            <Link to="/subscription">Порівняти тарифи</Link>
+                        </div>
+                    ) : null}
                 </div>
                 <div className="dm-listing-form-plan">
                     <span>{role === 'admin' ? 'Admin доступ' : canUseExtendedMedia ? `${subscribeType} план` : 'Free план'}</span>

@@ -1,3 +1,5 @@
+import type { Listing } from '../components/ListingCard';
+
 export interface Agent {
     _id: string;
     userId?: string;
@@ -18,6 +20,11 @@ export interface Agent {
 }
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
+export interface AgentListingsResponse {
+    agent: Agent;
+    listings: Listing[];
+}
 
 export type AgentPayload = {
     image: string[];
@@ -43,6 +50,22 @@ export const fetchAgents = async (): Promise<Agent[]> => {
     }
 
     return Array.isArray(data) ? data : [];
+};
+
+export const fetchAgentListings = async (agentId: string): Promise<AgentListingsResponse> => {
+    const response = await fetch(`${API_URL}/api/agents/${encodeURIComponent(agentId)}/listings`, {
+        credentials: 'include',
+    });
+    const data = await response.json().catch(() => null);
+
+    if (!response.ok) {
+        throw new Error(data?.message || data?.error || `Failed to fetch agent listings: ${response.status}`);
+    }
+
+    return {
+        agent: data.agent,
+        listings: Array.isArray(data?.listings) ? data.listings : [],
+    };
 };
 
 export const getAgentImage = (image: Agent['image']) => {

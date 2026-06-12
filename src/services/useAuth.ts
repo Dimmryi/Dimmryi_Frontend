@@ -12,6 +12,7 @@ import {
 } from '../features/registration/registrationSlice';
 import type { SubscribeType } from '../features/registration/registrationSlice';
 import { setAuthProperty, resetAuthProperty, setAuthChecking } from '../features/auth/authSlice';
+import { resetFavorites } from '../features/favorites/favoritesSlice';
 import { fetchListings } from './ListingService';
 import { RootState } from '../store/store';
 
@@ -131,6 +132,7 @@ export const useAuth = () => {
 
             dispatch(resetRegistration());
             dispatch(resetAuthProperty());
+            dispatch(resetFavorites());
             localStorage.removeItem('user');
             localStorage.removeItem('registrationState');
             localStorage.removeItem('userImages');
@@ -158,6 +160,7 @@ export const useAuth = () => {
         localStorage.removeItem('sessionExpiry');
         dispatch(resetRegistration());
         dispatch(resetAuthProperty());
+        dispatch(resetFavorites());
         dispatch(setAuthChecking(false));
         if (setListings) {
             const freshData = await fetchListings();

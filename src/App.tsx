@@ -16,6 +16,7 @@ const Details = lazy(() => import('./pages/Details'));
 const ChatPage = lazy(() => import('./pages/ChatPage'));
 const Favorites = lazy(() => import('./pages/Favorites'));
 const Agents = lazy(() => import('./pages/Agents'));
+const AgentProfile = lazy(() => import('./pages/AgentProfile'));
 const ForAgents = lazy(() => import('./pages/ForAgents'));
 const Socials = lazy(() => import('./pages/Socials'));
 const Contacts = lazy(() => import('./pages/Contacts'));
@@ -77,6 +78,7 @@ function App() {
                                 <Route path="notification" element={<Notification />} />
                                 <Route path="notification/edit/:notificationId" element={<Notification />} />
                                 <Route path="agents" element={<Agents />} />
+                                <Route path="agents/:agentId" element={<AgentProfile />} />
                                 <Route path="for-agents" element={<ForAgents />} />
                                 <Route path="socials" element={<Socials />} />
                                 <Route path="contacts" element={<Contacts />} />
